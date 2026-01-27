@@ -4,10 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     
-    <title>Fitness Pro V18</title>
+    <title>Fitness Pro V19</title>
+    <meta name="description" content="Coach fitness personnel intelligent.">
     <meta name="theme-color" content="#020617">
+    
+    <!-- PWA: Manifest Placeholder -->
+    <link rel="manifest" id="my-manifest-placeholder">
+    
+    <!-- iOS / Apple Mobile Web App Config -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Fitness Pro">
 
     <!-- Tailwind & Icons -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -58,6 +65,13 @@
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
         .calendar-day { aspect-ratio: 1; border-radius: 8px; background: rgba(255,255,255,0.03); display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.7rem; color: #64748b; font-weight: 600; transition: all 0.3s ease; }
         .calendar-day.active { background: #3b82f6; color: white; box-shadow: 0 0 12px rgba(59, 130, 246, 0.5); transform: scale(1.1); }
+
+        /* --- PWA INSTALL PROMPT --- */
+        #install-prompt {
+            position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(200px);
+            z-index: 100; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        #install-prompt.visible { transform: translateX(-50%) translateY(0); }
     </style>
 </head>
 <body class="h-screen w-full overflow-hidden text-slate-100">
@@ -73,9 +87,25 @@
                 </p>
                 <h1 class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400">Fitness Pro</h1>
             </div>
-            <div class="w-11 h-11 rounded-full glass flex items-center justify-center border border-white/10 shadow-lg">
+            <div class="w-11 h-11 rounded-full glass flex items-center justify-center border border-white/10 shadow-lg relative">
                 <i data-lucide="user" class="text-white w-5 h-5"></i>
+                <div id="pwa-badge" class="hidden absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border border-[#020617]"></div>
             </div>
+        </div>
+
+        <!-- Install PWA Prompt Custom Button -->
+        <div id="install-prompt" class="glass-card flex items-center gap-4 p-4 rounded-xl shadow-2xl border border-blue-500/50 w-[90%] max-w-sm">
+            <div class="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center text-white shrink-0">
+                <i data-lucide="download" class="w-5 h-5"></i>
+            </div>
+            <div class="flex-1">
+                <h4 class="font-bold text-sm text-white">Installer l'App</h4>
+                <p class="text-[10px] text-slate-300">Pour une meilleure expérience</p>
+            </div>
+            <button onclick="installPWA()" class="px-3 py-1.5 bg-white text-blue-900 font-bold text-xs rounded-lg active:scale-95 transition-transform">
+                Installer
+            </button>
+            <button onclick="dismissInstall()" class="text-slate-400"><i data-lucide="x" class="w-4 h-4"></i></button>
         </div>
 
         <!-- Stats -->
@@ -231,6 +261,63 @@
     </div>
 
     <script>
+        // === PWA LOGIC: GENERATE MANIFEST DYNAMICALLY ===
+        (function setupPWA() {
+            const manifest = {
+                "name": "Fitness Pro",
+                "short_name": "Fitness",
+                "start_url": ".",
+                "display": "standalone",
+                "background_color": "#020617",
+                "theme_color": "#020617",
+                "orientation": "portrait",
+                "icons": [
+                    {
+                        "src": "https://cdn-icons-png.flaticon.com/512/2964/2964514.png", 
+                        "sizes": "192x192",
+                        "type": "image/png"
+                    },
+                    {
+                        "src": "https://cdn-icons-png.flaticon.com/512/2964/2964514.png", 
+                        "sizes": "512x512",
+                        "type": "image/png"
+                    }
+                ]
+            };
+            const stringManifest = JSON.stringify(manifest);
+            const blob = new Blob([stringManifest], {type: 'application/json'});
+            const manifestURL = URL.createObjectURL(blob);
+            document.getElementById('my-manifest-placeholder').setAttribute('href', manifestURL);
+        })();
+
+        // === PWA INSTALL PROMPT LOGIC ===
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('install-prompt').classList.add('visible');
+        });
+
+        async function installPWA() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    console.log('User accepted the PWA prompt');
+                }
+                deferredPrompt = null;
+                document.getElementById('install-prompt').classList.remove('visible');
+            }
+        }
+        function dismissInstall() {
+            document.getElementById('install-prompt').classList.remove('visible');
+        }
+
+        // Detect if installed (standalone mode)
+        if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+            document.getElementById('pwa-badge').classList.remove('hidden');
+        }
+
         // === TEMPLATE JSON ULTRA-EXIGEANT ===
         const JSON_TEMPLATE_FOR_AI = {
             "id": "unique_id_here",
