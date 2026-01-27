@@ -308,7 +308,7 @@
     <!-- === 2. PAGE SÉANCE === -->
     <div id="workout-page" class="page-content h-full overflow-y-auto no-scrollbar px-4 pt-6">
         <div
-            class="flex items-start justify-between mb-8 sticky top-0 z-20 pt-4 pb-4 bg-[#020617]/95 backdrop-blur-xl border-b border-white/5 -mx-4 px-4 transition-all">
+            class="flex items-start justify-between mb-8 sticky top-0 z-20 pt-4 pb-4 bg-slate-900/60 backdrop-blur-2xl border-b border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.36)] -mx-4 px-4 transition-all">
             <div class="flex-1 min-w-0 mr-4">
                 <h2 id="workout-page-title" class="text-2xl font-black text-white leading-tight break-words mb-1">...
                 </h2>
@@ -484,7 +484,8 @@
         <div
             class="w-full max-w-md bg-[#0f172a] border border-white/10 rounded-3xl overflow-hidden flex flex-col max-h-[85vh] shadow-2xl animate-in fade-in zoom-in-95 duration-200">
             <!-- Header -->
-            <div class="px-6 py-4 border-b border-white/5 flex justify-between items-center bg-slate-900">
+            <div
+                class="px-6 py-4 border-b border-white/10 flex justify-between items-center bg-slate-900/80 backdrop-blur-xl">
                 <h3 id="preview-title" class="font-bold text-white text-lg truncate pr-4">Titre</h3>
                 <button onclick="closePreview()"
                     class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-colors"><i
@@ -496,7 +497,7 @@
                 <!-- Image Area -->
                 <div id="preview-image-container"
                     class="w-full aspect-video bg-black/50 rounded-2xl border border-white/5 flex items-center justify-center relative overflow-hidden group">
-                    <img id="preview-image" class="w-full h-full object-contain z-10 relative">
+                    <img id="preview-image" class="w-full h-full object-cover z-10 relative">
                     <div id="preview-no-image"
                         class="absolute inset-0 flex flex-col items-center justify-center text-slate-600 gap-2">
                         <i data-lucide="image-off" class="w-8 h-8 opacity-50"></i>
@@ -512,7 +513,8 @@
                     </div>
 
                     <h4 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3 flex items-center gap-2">
-                        <i data-lucide="list" class="w-3 h-3"></i> Instructions</h4>
+                        <i data-lucide="list" class="w-3 h-3"></i> Instructions
+                    </h4>
                     <div id="preview-instructions" class="space-y-3 text-sm text-slate-300 leading-relaxed font-light">
                     </div>
                 </div>
@@ -1156,24 +1158,28 @@
             document.getElementById('preview-mode').innerText = ex.mode === 'timer' ? `${ex.val} secondes` : `${ex.val} répétitions`;
 
             // Image (Robust: Check State first, then Fresh Catalog)
-            // Image (Robust: Check State first, then Fresh Catalog)
+            // Image (Updated: Hide container if no image)
             const img = document.getElementById('preview-image');
-            const noImage = document.getElementById('preview-no-image');
-            const container = document.getElementById('preview-image-container'); // Container itself is always showing now if we want placeholder
+            const container = document.getElementById('preview-image-container');
 
             const freshData = findExerciseData(ex.name_en);
             const displayUrl = ex.gifUrl || freshData?.gifUrl;
 
-            // Reset state
+            // Default state: Hide container completely
+            container.classList.add('hidden');
             img.classList.add('hidden');
-            noImage.classList.remove('hidden');
 
             if (displayUrl) {
+                // Try showing it
+                container.classList.remove('hidden');
                 img.src = displayUrl;
                 img.classList.remove('hidden');
-                noImage.classList.add('hidden');
-                // If native error, show placeholder
-                img.onerror = () => { img.classList.add('hidden'); noImage.classList.remove('hidden'); };
+
+                // If it fails to load, hide the container again (Incognito mode)
+                img.onerror = () => {
+                    container.classList.add('hidden');
+                    img.classList.add('hidden');
+                };
             }
 
             // Instructions
@@ -1341,12 +1347,12 @@
             // --- STATIC IMAGE DISPLAY (GitHub Raw) ---
             if (ex.gifUrl) {
                 const imgContainer = document.createElement('div');
-                imgContainer.className = "mt-4 rounded-xl overflow-hidden border border-white/10 bg-black/50 shadow-lg relative aspect-video flex items-center justify-center group";
+                imgContainer.className = "mt-4 rounded-xl overflow-hidden border border-white/10 bg-black/50 shadow-lg relative aspect-square flex items-center justify-center group";
 
                 const img = document.createElement('img');
                 img.src = ex.gifUrl;
                 img.alt = "Animation " + ex.name_fr;
-                img.className = "w-full h-full object-contain opacity-0 transition-opacity duration-500";
+                img.className = "w-full h-full object-cover opacity-0 transition-opacity duration-500";
                 img.onload = () => img.classList.replace('opacity-0', 'opacity-100');
                 img.onerror = () => imgContainer.style.display = 'none'; // Hide if broken
 
