@@ -649,7 +649,7 @@
 
         // === TEMPLATE JSON ULTRA-EXIGEANT ===
         const JSON_TEMPLATE_FOR_AI = {
-            "_instruction_pour_ia": "Adaptez ce gabarit JSON pour créer la séance d'entraînement. Conservez la structure. Pour les instructions, listez simplement les étapes clés de l'exécution (sans préfixe 'CRITIQUE').",
+            "_instruction_pour_ia": "Adaptez ce gabarit JSON pour créer la séance d'entraînement. IMPORTANT : TOUTES les durées ('val' si mode='timer') doivent être en SECONDES (ex: 300 pour 5 min). Pour les instructions, listez simplement les étapes clés.",
             "id": "unique_id_here",
             "title": "Titre du Programme",
             "tag": "Objectif (ex: Hypertrophie)",
@@ -667,7 +667,7 @@
                             "name_fr": "Nom Français (Officiel)",
                             "name_en": "English Name (Officiel)",
                             "mode": "reps | timer",
-                            "val": 12,
+                            "val": 60, // IMPORTANT: EN SECONDES (si timer) ou NB REPS
                             "rest_after_exercise": 0,
                             "icon": "lucide_icon_name",
                             "color": "from-blue-600 to-indigo-600",
