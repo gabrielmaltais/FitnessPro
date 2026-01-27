@@ -649,6 +649,7 @@
 
         // === TEMPLATE JSON ULTRA-EXIGEANT ===
         const JSON_TEMPLATE_FOR_AI = {
+            "_instruction_pour_ia": "Adaptez ce gabarit JSON pour créer la séance d'entraînement. Conservez la structure. Pour les instructions, listez simplement les étapes clés de l'exécution (sans préfixe 'CRITIQUE').",
             "id": "unique_id_here",
             "title": "Titre du Programme",
             "tag": "Objectif (ex: Hypertrophie)",
@@ -672,10 +673,10 @@
                             "color": "from-blue-600 to-indigo-600",
                             "muscles": ["Muscle A", "Muscle B"],
                             "instructions": [
-                                "CRITIQUE: Décrire la position de départ (pieds, mains, posture) précisément.",
-                                "CRITIQUE: Décrire le mouvement phase par phase (excentrique/concentrique).",
-                                "CRITIQUE: Indiquer comment respirer (ex: Inspirez en descendant).",
-                                "OBLIGATOIRE: Mentionner une erreur fréquente à éviter."
+                                "Position de départ (pieds, mains, posture).",
+                                "Mouvement phase par phase (excentrique/concentrique).",
+                                "Respiration (ex: Inspirez en descendant).",
+                                "Point de vigilance (erreur à éviter)."
                             ],
                             "tips": "Conseil d'expert court.",
                             "url": null // LAISSER VIDE. L'application trouvera le lien automatiquement.
@@ -1187,9 +1188,11 @@
             instrDiv.innerHTML = '';
             if (ex.instructions && ex.instructions.length > 0) {
                 ex.instructions.forEach(text => {
+                    // Remove prefixes like "CRITIQUE:", "1.", "-", etc.
+                    const cleanText = text.replace(/^((CRITIQUE|OBLIGATOIRE):|\d+[.)]|-|•)\s*/i, "");
                     const p = document.createElement('p');
                     p.className = "flex gap-2";
-                    p.innerHTML = `<span class="mt-1.5 w-1 h-1 rounded-full bg-slate-500 shrink-0"></span><span>${text}</span>`;
+                    p.innerHTML = `<span class="mt-1.5 w-1 h-1 rounded-full bg-slate-500 shrink-0"></span><span>${cleanText}</span>`;
                     instrDiv.appendChild(p);
                 });
             } else {
@@ -1332,11 +1335,12 @@
             instrContainer.innerHTML = '';
             if (ex.instructions && ex.instructions.length > 0) {
                 ex.instructions.forEach((ins, idx) => {
+                    const cleanIns = ins.replace(/^((CRITIQUE|OBLIGATOIRE):|\d+[.)]|-|•)\s*/i, "");
                     const div = document.createElement('div');
                     div.className = "p-3 bg-white/5 rounded-lg border border-white/5 mb-2 flex gap-3";
                     div.innerHTML = `
                         <span class="w-5 h-5 rounded-full bg-blue-500/20 text-blue-300 text-[10px] font-bold flex items-center justify-center shrink-0 border border-blue-500/20 mt-0.5">${idx + 1}</span>
-                        <p class="text-xs text-slate-300 leading-relaxed font-medium">${ins}</p>
+                        <p class="text-xs text-slate-300 leading-relaxed font-medium">${cleanIns}</p>
                     `;
                     instrContainer.appendChild(div);
                 });
