@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     
-    <title>Fitness Pro V19</title>
+    <title>Fitness Pro V20</title>
     <meta name="description" content="Coach fitness personnel intelligent.">
     <meta name="theme-color" content="#020617">
     
@@ -167,13 +167,19 @@
 
     <!-- === 3. PLAYER (Overlay) === -->
     <div id="player-overlay" class="fixed inset-0 w-full h-full bg-[#020617] flex flex-col z-[200] translate-y-full transition-transform duration-300">
-        <div class="px-6 pt-safe top-4 flex items-center justify-between h-[60px] shrink-0 z-20">
+        
+        <!-- GLOBAL PROGRESS BAR -->
+        <div class="absolute top-0 left-0 w-full h-1 bg-white/10 z-50">
+            <div id="global-progress-bar" class="h-full bg-gradient-to-r from-blue-500 to-indigo-500 w-0 transition-all duration-300"></div>
+        </div>
+
+        <div class="px-6 pt-safe top-4 flex items-center justify-between h-[60px] shrink-0 z-20 mt-2">
             <div class="flex flex-col">
                 <div class="flex items-center gap-2 text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-0.5">
                     <span id="player-progress-text">1 / 10</span>
-                    <span class="w-1 h-1 rounded-full bg-slate-600"></span>
-                    <span id="player-set-badge" class="text-blue-400">SÉRIE 1/3</span>
                 </div>
+                
+                <!-- TITRE EXERCICE -->
                 <h2 id="player-title" class="text-xl font-black text-white leading-none tracking-tight truncate w-64">...</h2>
                 <p id="player-subtitle" class="text-xs text-slate-500 font-medium truncate w-64">...</p>
             </div>
@@ -182,6 +188,11 @@
 
         <div class="flex-1 overflow-y-auto w-full px-6 pt-2 pb-32 relative z-10 no-scrollbar flex flex-col items-center">
             
+            <!-- LOCAL PROGRESS (Rounds/Sets Dots) -->
+            <div id="local-progress-container" class="w-full flex items-center gap-1.5 mb-4 hidden">
+                <!-- Injecté par JS : les "pilules" pour chaque round -->
+            </div>
+
             <!-- TIMER / VISUAL CONTAINER -->
             <div id="visual-container" class="w-full h-40 shrink-0 rounded-[2rem] mb-4 shadow-2xl relative overflow-hidden flex flex-row items-center justify-between px-8 cursor-pointer ring-1 ring-white/20 group transition-all bg-gradient-to-br from-slate-700 to-slate-800" onclick="handleVisualClick()">
                 <i id="player-bg-icon" data-lucide="dumbbell" class="w-24 h-24 text-white/10 absolute -right-2 top-1/2 -translate-y-1/2 rotate-12 transition-transform duration-500"></i>
@@ -680,7 +691,15 @@
             workout.blocks.forEach(block => {
                 for(let set = 1; set <= block.sets; set++) {
                     block.exercises.forEach((ex, exIdx) => {
-                        list.push({ type: 'work', data: ex, blockTitle: block.title, setInfo: block.sets > 1 ? `Série ${set}/${block.sets}` : '', blockType: block.type });
+                        list.push({ 
+                            type: 'work', 
+                            data: ex, 
+                            blockTitle: block.title, 
+                            setInfo: block.sets > 1 ? `Série ${set}/${block.sets}` : '', 
+                            currentSet: set,      // NEW: For Local Progress
+                            totalSets: block.sets,// NEW: For Local Progress
+                            blockType: block.type 
+                        });
                         if(ex.rest_after_exercise > 0) {
                              list.push({ type: 'rest', duration: ex.rest_after_exercise });
                         } else if (exIdx === block.exercises.length - 1 && set < block.sets && block.rest_between_sets > 0) {
@@ -711,6 +730,27 @@
 
             const step = playlist[currentStepIndex];
 
+            // UPDATE GLOBAL PROGRESS BAR
+            const progressPct = ((currentStepIndex) / playlist.length) * 100;
+            document.getElementById('global-progress-bar').style.width = `${progressPct}%`;
+
+            // UPDATE LOCAL PROGRESS (Rounds)
+            const localContainer = document.getElementById('local-progress-container');
+            if(step.totalSets > 1 && step.type === 'work') {
+                localContainer.classList.remove('hidden');
+                localContainer.innerHTML = '';
+                for(let i=1; i<=step.totalSets; i++) {
+                    const pill = document.createElement('div');
+                    // Style: Active/Past/Future
+                    if (i < step.currentSet) pill.className = "flex-1 h-1.5 rounded-full bg-blue-500/50";
+                    else if (i === step.currentSet) pill.className = "flex-1 h-1.5 rounded-full bg-blue-500 animate-pulse box-shadow-[0_0_8px_rgba(59,130,246,0.8)]";
+                    else pill.className = "flex-1 h-1.5 rounded-full bg-white/10";
+                    localContainer.appendChild(pill);
+                }
+            } else {
+                localContainer.classList.add('hidden');
+            }
+
             // SI C'EST DU REPOS
             if(step.type === 'rest') {
                 renderRestStep(step.duration);
@@ -728,7 +768,6 @@
             document.getElementById('instruction-icon').setAttribute('data-lucide', 'list-checks');
 
             document.getElementById('player-progress-text').innerText = `${currentStepIndex + 1} / ${playlist.length}`;
-            document.getElementById('player-set-badge').innerText = step.setInfo || 'SÉRIE';
             
             const visual = document.getElementById('visual-container');
             visual.className = `w-full h-40 shrink-0 rounded-[2rem] mb-4 shadow-2xl relative overflow-hidden flex flex-row items-center justify-between px-8 cursor-pointer ring-1 ring-white/20 group transition-all bg-gradient-to-br ${ex.color || 'from-slate-700 to-slate-800'}`;
@@ -746,9 +785,7 @@
                 document.getElementById('timer-status-text').innerText = "Prêt ?";
                 
                 // --- AUTO START LOGIC ---
-                // Démarrage auto après 1.5s pour laisser le temps de voir l'écran
                 setTimeout(() => {
-                    // Vérifier qu'on est toujours sur le même step et que ça n'a pas déjà démarré
                     if(currentStepIndex === playlist.indexOf(step) && !isRunning) {
                         startWorkTimer(ex);
                     }
@@ -779,13 +816,14 @@
 
         // --- NOUVELLE FONCTION: RENDU INTÉGRÉ DU REPOS ---
         function renderRestStep(duration) {
-            // Identifier le prochain exercice
+            // Hide local progress during rest to avoid confusion
+            document.getElementById('local-progress-container').classList.add('hidden');
+
             let nextName = "Terminé !";
             for(let i=currentStepIndex+1; i<playlist.length; i++) {
                 if(playlist[i].type === 'work') { nextName = playlist[i].data.name_fr; break; }
             }
 
-            // UI Updates pour mode "Repos"
             document.getElementById('player-title').innerText = "Récupération";
             document.getElementById('player-subtitle').classList.add('hidden');
             document.getElementById('weight-input-container').classList.add('hidden');
@@ -794,14 +832,12 @@
             document.getElementById('instruction-icon').setAttribute('data-lucide', 'arrow-right-circle');
 
             const visual = document.getElementById('visual-container');
-            // Fond bleu nuit apaisant pour le repos
             visual.className = `w-full h-40 shrink-0 rounded-[2rem] mb-4 shadow-2xl relative overflow-hidden flex flex-row items-center justify-between px-8 ring-1 ring-white/20 bg-gradient-to-br from-indigo-900 to-slate-900`;
             document.getElementById('player-bg-icon').setAttribute('data-lucide', 'coffee');
             
             document.getElementById('timer-display-group').classList.remove('hidden');
             document.getElementById('reps-display-group').classList.add('hidden');
             
-            // Affichage "Prochain Exercice" dans la zone d'instructions
             const instrContainer = document.getElementById('player-instructions');
             instrContainer.innerHTML = `
                 <div class="p-4 bg-indigo-500/10 rounded-xl border border-indigo-500/30 flex items-center gap-4">
@@ -813,7 +849,6 @@
                 </div>
             `;
             
-            // Lancer le timer de repos
             startRestTimerIntegrated(duration);
             lucide.createIcons();
         }
@@ -840,8 +875,7 @@
 
         function handleVisualClick() {
             const step = playlist[currentStepIndex];
-            if(step.type === 'rest') return; // Click during rest does nothing (use button below)
-            
+            if(step.type === 'rest') return; 
             if(isRunning) {
                 stopTimer();
                 document.getElementById('timer-status-text').innerText = "Pause";
@@ -852,7 +886,7 @@
         }
 
         function startWorkTimer(ex) {
-            if(isRunning) return; // Prevent double start
+            if(isRunning) return;
             isRunning = true;
             document.getElementById('visual-container').classList.add('pulse-heart');
             if(ex.mode === 'reps') return;
