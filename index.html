@@ -4,26 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     
-    <!-- === PWA CONFIGURATION === -->
-    <title>Fitness Pro Coach</title>
-    <meta name="description" content="Votre coach fitness personnel, intelligent et gratuit.">
+    <title>Fitness Pro V18</title>
     <meta name="theme-color" content="#020617">
-    
-    <!-- iOS / Apple Mobile Web App Config -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Fitness Pro">
-    
-    <!-- Manifest Placeholder (Généré dynamiquement par JS pour le mode Single-File) -->
-    <link rel="manifest" id="my-manifest-placeholder">
 
-    <!-- Tailwind CSS -->
+    <!-- Tailwind & Icons -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Icônes Lucide -->
     <script src="https://unpkg.com/lucide@latest"></script>
-
-    <!-- Confetti -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
     <style>
@@ -41,142 +29,61 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* --- AMBIENT BACKGROUND --- */
-        .ambient-light {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
-            background: #020617;
-            overflow: hidden;
-        }
-        .blob {
-            position: absolute;
-            filter: blur(80px);
-            opacity: 0.5;
-            animation: float 10s ease-in-out infinite;
-        }
+        /* --- BACKGROUND --- */
+        .ambient-light { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: #020617; overflow: hidden; }
+        .blob { position: absolute; filter: blur(80px); opacity: 0.5; animation: float 10s ease-in-out infinite; }
         .blob-1 { top: -10%; left: -10%; width: 50vw; height: 50vw; background: #4f46e5; animation-delay: 0s; }
         .blob-2 { bottom: -10%; right: -10%; width: 60vw; height: 60vw; background: #db2777; animation-delay: -5s; }
-        .blob-3 { top: 40%; left: 30%; width: 40vw; height: 40vw; background: #0891b2; opacity: 0.3; animation-delay: -2s; }
 
-        @keyframes float {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            33% { transform: translate(30px, -50px) scale(1.1); }
-            66% { transform: translate(-20px, 20px) scale(0.9); }
-        }
+        /* --- GLASS COMPONENTS --- */
+        .glass { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .glass-card { background: linear-gradient(145deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.8) 100%); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); }
 
-        /* --- GLASSMORPHISM --- */
-        .glass {
-            background: rgba(15, 23, 42, 0.6);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-        }
-        .glass-card {
-            background: linear-gradient(145deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.8) 100%);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
-        }
-
-        /* --- ANIMATIONS --- */
-        .page-content {
-            display: none;
-            padding-bottom: 120px;
-            padding-top: env(safe-area-inset-top);
-        }
+        /* --- ANIMATIONS & LAYOUT --- */
+        .page-content { display: none; padding-bottom: 120px; padding-top: env(safe-area-inset-top); }
         .page-content.active { display: block; animation: fadeScale 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
         @keyframes fadeScale { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
-        .stagger-item { opacity: 0; transform: translateY(20px); animation: fadeInUp 0.5s forwards; }
-        @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
-        .delay-100 { animation-delay: 100ms; }
-        .delay-200 { animation-delay: 200ms; }
-        .delay-300 { animation-delay: 300ms; }
 
-        /* --- OVERLAYS --- */
-        #player-overlay { transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1); transform: translateY(100%); z-index: 200; }
-        #player-overlay.active { transform: translateY(0); }
-
-        /* --- COMPONENTS --- */
-        .glow-ring { filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.6)); }
+        .program-card { transition: all 0.2s; border: 1px solid rgba(255,255,255,0.05); }
+        .program-card:active { transform: scale(0.98); }
         
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
-        .calendar-day {
-            aspect-ratio: 1; border-radius: 8px; background: rgba(255,255,255,0.03);
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            font-size: 0.7rem; color: #64748b; font-weight: 600; transition: all 0.3s ease; line-height: 1.1;
-        }
-        .calendar-day.active {
-            background: #3b82f6; color: white; box-shadow: 0 0 12px rgba(59, 130, 246, 0.5); transform: scale(1.1);
-        }
-
         .pulse-heart { animation: heartbeat 1.5s infinite; }
         @keyframes heartbeat { 0% { transform: scale(1); } 15% { transform: scale(1.05); } 30% { transform: scale(1); } 100% { transform: scale(1); } }
 
-        .details-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out, opacity 0.3s ease-out; opacity: 0; }
-        .details-content.open { max-height: 800px; opacity: 1; }
-        .chevron-rotate { transition: transform 0.3s ease; }
-        .chevron-rotate.rotate { transform: rotate(180deg); }
+        /* --- STRUCTURE STYLES --- */
+        .block-group { border-left: 2px solid rgba(255,255,255,0.1); padding-left: 1rem; margin-bottom: 1.5rem; }
+        .block-label { display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 8px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; }
 
-        /* Program Card */
-        .program-card {
-            transition: all 0.2s; border: 1px solid rgba(255,255,255,0.05);
-        }
-        .program-card:active { transform: scale(0.98); border-color: rgba(255,255,255,0.2); }
-
-        /* Install Prompt */
-        #install-prompt {
-            position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(200px);
-            z-index: 100; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        #install-prompt.visible { transform: translateX(-50%) translateY(0); }
+        /* --- CALENDAR --- */
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+        .calendar-day { aspect-ratio: 1; border-radius: 8px; background: rgba(255,255,255,0.03); display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.7rem; color: #64748b; font-weight: 600; transition: all 0.3s ease; }
+        .calendar-day.active { background: #3b82f6; color: white; box-shadow: 0 0 12px rgba(59, 130, 246, 0.5); transform: scale(1.1); }
     </style>
 </head>
 <body class="h-screen w-full overflow-hidden text-slate-100">
 
-    <div class="ambient-light">
-        <div class="blob blob-1"></div>
-        <div class="blob blob-2"></div>
-        <div class="blob blob-3"></div>
-    </div>
+    <div class="ambient-light"><div class="blob blob-1"></div><div class="blob blob-2"></div></div>
 
     <!-- === 1. PAGE ACCUEIL === -->
     <div id="home-page" class="page-content active h-full overflow-y-auto no-scrollbar px-5 pt-8">
-        
-        <div class="flex justify-between items-center mb-8 stagger-item">
+        <div class="flex justify-between items-center mb-8">
             <div>
                 <p class="text-blue-400 text-xs font-bold uppercase tracking-widest mb-1 flex items-center gap-1">
                     <span class="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span> Bonjour
                 </p>
-                <h1 class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400 tracking-tight">Mon Coach</h1>
+                <h1 class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400">Fitness Pro</h1>
             </div>
-            <div class="w-11 h-11 rounded-full glass flex items-center justify-center border border-white/10 shadow-lg relative">
+            <div class="w-11 h-11 rounded-full glass flex items-center justify-center border border-white/10 shadow-lg">
                 <i data-lucide="user" class="text-white w-5 h-5"></i>
-                <!-- Indicateur PWA si installé -->
-                <div id="pwa-badge" class="hidden absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border border-[#020617]"></div>
             </div>
-        </div>
-
-        <!-- Install PWA Prompt Custom Button -->
-        <div id="install-prompt" class="glass-card flex items-center gap-4 p-4 rounded-xl shadow-2xl border border-blue-500/50 w-[90%] max-w-sm">
-            <div class="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center text-white shrink-0">
-                <i data-lucide="download" class="w-5 h-5"></i>
-            </div>
-            <div class="flex-1">
-                <h4 class="font-bold text-sm text-white">Installer l'App</h4>
-                <p class="text-[10px] text-slate-300">Pour une meilleure expérience</p>
-            </div>
-            <button onclick="installPWA()" class="px-3 py-1.5 bg-white text-blue-900 font-bold text-xs rounded-lg">
-                Installer
-            </button>
-            <button onclick="dismissInstall()" class="text-slate-400"><i data-lucide="x" class="w-4 h-4"></i></button>
         </div>
 
         <!-- Stats -->
-        <div class="glass-card rounded-[2rem] p-6 mb-8 relative overflow-hidden flex items-center justify-between stagger-item delay-100">
+        <div class="glass-card rounded-[2rem] p-6 mb-8 relative overflow-hidden flex items-center justify-between">
             <div class="z-10">
                 <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wide mb-2">Objectif Hebdo</h2>
                 <div class="flex items-baseline gap-2">
-                    <span id="completed-count" class="text-6xl font-black text-white tracking-tighter drop-shadow-lg">0</span>
+                    <span id="completed-count" class="text-6xl font-black text-white tracking-tighter">0</span>
                     <span class="text-slate-400 font-bold text-sm mb-2">/ <span id="goal-count">3</span> Séances</span>
                 </div>
                 <div class="h-1.5 w-24 bg-slate-700/50 rounded-full mt-2 overflow-hidden">
@@ -184,36 +91,27 @@
                 </div>
             </div>
             <div class="relative w-24 h-24 shrink-0">
-                <svg class="w-full h-full transform -rotate-90 drop-shadow-xl" viewBox="0 0 100 100">
+                <svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
                     <circle class="text-slate-800/50 stroke-current" stroke-width="8" cx="50" cy="50" r="40" fill="transparent"></circle>
-                    <circle id="progress-ring" class="text-blue-500 glow-ring progress-ring__circle stroke-current" stroke-width="8" stroke-linecap="round" cx="50" cy="50" r="40" fill="transparent" stroke-dasharray="251.2" stroke-dashoffset="251.2" style="transition: stroke-dashoffset 1s ease-out;"></circle>
+                    <circle id="progress-ring" class="text-blue-500 stroke-current" stroke-width="8" stroke-linecap="round" cx="50" cy="50" r="40" fill="transparent" stroke-dasharray="251.2" stroke-dashoffset="251.2"></circle>
                 </svg>
-                <div class="absolute inset-0 flex items-center justify-center">
-                    <i data-lucide="trophy" class="w-8 h-8 text-yellow-400 fill-yellow-400/20"></i>
-                </div>
+                <div class="absolute inset-0 flex items-center justify-center"><i data-lucide="trophy" class="w-8 h-8 text-yellow-400 fill-yellow-400/20"></i></div>
             </div>
         </div>
 
-        <!-- Section Programmes -->
-        <div class="mb-8 stagger-item delay-200">
-            <div class="flex items-center justify-between mb-4 px-1">
-                <h3 class="font-bold text-lg text-white flex items-center gap-2">
-                    <i data-lucide="dumbbell" class="w-4 h-4 text-indigo-400"></i> Mes Programmes
-                </h3>
-            </div>
-            <div id="programs-list" class="space-y-3">
-                <!-- Généré par JS -->
-            </div>
+        <!-- Programmes -->
+        <div class="mb-8">
+            <h3 class="font-bold text-lg text-white flex items-center gap-2 mb-4">
+                <i data-lucide="dumbbell" class="w-4 h-4 text-indigo-400"></i> Mes Programmes
+            </h3>
+            <div id="programs-list" class="space-y-3"></div>
         </div>
 
         <!-- Calendrier -->
-        <div class="mb-8 stagger-item delay-300">
-            <div class="flex items-center justify-between mb-4 px-1">
-                <h3 class="font-bold text-lg text-white flex items-center gap-2">
-                    <i data-lucide="calendar" class="w-4 h-4 text-pink-500"></i> Historique
-                </h3>
-                <span class="text-[10px] font-bold bg-white/10 px-2 py-1 rounded text-slate-300 border border-white/5" id="streak-badge">Série: 0j</span>
-            </div>
+        <div class="mb-8">
+            <h3 class="font-bold text-lg text-white flex items-center gap-2 mb-4">
+                <i data-lucide="calendar" class="w-4 h-4 text-pink-500"></i> Activité Récente
+            </h3>
             <div class="glass rounded-2xl p-4 border border-white/5">
                 <div class="calendar-grid" id="calendar-grid"></div>
             </div>
@@ -222,9 +120,9 @@
 
     <!-- === 2. PAGE SÉANCE === -->
     <div id="workout-page" class="page-content h-full overflow-y-auto no-scrollbar px-4 pt-6">
-        <div class="flex items-center justify-between mb-8 sticky top-0 z-20 py-2 bg-transparent backdrop-blur-sm">
+        <div class="flex items-center justify-between mb-6 sticky top-0 z-20 py-2 bg-[#020617]/80 backdrop-blur-md">
             <div>
-                <h2 id="workout-page-title" class="text-2xl font-black tracking-tight text-white leading-tight">...</h2>
+                <h2 id="workout-page-title" class="text-xl font-black tracking-tight text-white leading-tight w-64 truncate">...</h2>
                 <div class="flex items-center gap-2 mt-1">
                     <span id="workout-page-tag" class="px-2 py-0.5 rounded bg-orange-500/20 text-orange-400 text-[10px] font-bold uppercase border border-orange-500/20">...</span>
                     <span id="workout-page-time" class="text-xs text-slate-400 font-medium">...</span>
@@ -234,430 +132,367 @@
                 <i data-lucide="play" class="fill-current ml-1"></i>
             </button>
         </div>
-
-        <p class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4 px-1">Détail du circuit</p>
-        <div class="space-y-3 pb-32" id="exercise-list"></div>
+        <div id="workout-structure-list" class="space-y-4 pb-32"></div>
     </div>
 
-    <!-- === 3. PLAYER (V10.2) === -->
-    <div id="player-overlay" class="fixed inset-0 w-full h-full bg-[#020617] flex flex-col z-[200]">
-        <div class="absolute top-[-10%] left-[-10%] w-[50vh] h-[50vh] bg-blue-600/20 blur-[100px] rounded-full pointer-events-none"></div>
-        <div class="absolute bottom-[-10%] right-[-10%] w-[50vh] h-[50vh] bg-purple-600/20 blur-[100px] rounded-full pointer-events-none"></div>
-
-        <div class="px-6 pt-safe top-4 flex items-center justify-between h-[60px] shrink-0 z-20 relative">
+    <!-- === 3. PLAYER (Overlay) === -->
+    <div id="player-overlay" class="fixed inset-0 w-full h-full bg-[#020617] flex flex-col z-[200] translate-y-full transition-transform duration-300">
+        <div class="px-6 pt-safe top-4 flex items-center justify-between h-[60px] shrink-0 z-20">
             <div class="flex flex-col">
                 <div class="flex items-center gap-2 text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-0.5">
-                    <span id="player-progress-text">1 / 7</span>
+                    <span id="player-progress-text">1 / 10</span>
                     <span class="w-1 h-1 rounded-full bg-slate-600"></span>
-                    <span id="player-mode-badge" class="text-blue-400">CHRONO</span>
+                    <span id="player-set-badge" class="text-blue-400">SÉRIE 1/3</span>
                 </div>
-                <h2 id="player-title" class="text-2xl font-black text-white leading-none tracking-tight">...</h2>
+                <h2 id="player-title" class="text-xl font-black text-white leading-none tracking-tight truncate w-64">...</h2>
+                <p id="player-subtitle" class="text-xs text-slate-500 font-medium truncate w-64">...</p>
             </div>
-            <button onclick="closePlayer()" class="w-10 h-10 rounded-full bg-white/5 backdrop-blur border border-white/10 flex items-center justify-center text-white active:bg-white/20">
-                <i data-lucide="x" class="w-5 h-5"></i>
-            </button>
+            <button onclick="closePlayer()" class="w-10 h-10 rounded-full bg-white/5 backdrop-blur border border-white/10 flex items-center justify-center text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
         </div>
 
-        <div class="flex-1 overflow-y-auto w-full px-6 pt-2 pb-32 relative z-10 no-scrollbar" id="player-scroll-area">
+        <div class="flex-1 overflow-y-auto w-full px-6 pt-2 pb-32 relative z-10 no-scrollbar flex flex-col items-center">
             
-            <div id="visual-container" class="w-full h-[220px] shrink-0 rounded-[2rem] mb-6 bg-gradient-to-br from-blue-600 to-indigo-700 shadow-2xl shadow-indigo-900/50 relative overflow-hidden mx-auto flex flex-col items-center justify-center cursor-pointer ring-1 ring-white/20 group transition-all duration-500" onclick="handleVisualClick()">
-                <div class="absolute inset-0 opacity-20" style="background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0); background-size: 24px 24px;"></div>
-                <i id="player-bg-icon" data-lucide="dumbbell" class="w-32 h-32 text-white/10 absolute rotate-12 group-active:scale-95 transition-transform duration-500"></i>
+            <!-- TIMER / VISUAL CONTAINER -->
+            <div id="visual-container" class="w-full h-40 shrink-0 rounded-[2rem] mb-4 shadow-2xl relative overflow-hidden flex flex-row items-center justify-between px-8 cursor-pointer ring-1 ring-white/20 group transition-all bg-gradient-to-br from-slate-700 to-slate-800" onclick="handleVisualClick()">
+                <i id="player-bg-icon" data-lucide="dumbbell" class="w-24 h-24 text-white/10 absolute -right-2 top-1/2 -translate-y-1/2 rotate-12 transition-transform duration-500"></i>
                 
-                <div class="relative z-10 text-center flex flex-col items-center">
-                    <div id="timer-display-group" class="transition-all duration-300">
-                        <div id="player-timer" class="text-[5rem] font-black text-white tracking-tighter leading-none drop-shadow-xl" style="font-variant-numeric: tabular-nums;">0:40</div>
-                        <div id="timer-status-text" class="text-xs font-bold text-white/80 mt-1 uppercase tracking-widest bg-black/20 px-3 py-1 rounded-full backdrop-blur border border-white/10">Toucher pour lancer</div>
+                <div class="relative z-10 flex flex-col items-start">
+                    <div id="timer-display-group">
+                        <div id="player-timer" class="text-5xl font-black text-white tracking-tighter leading-none drop-shadow-xl tabular-nums">00:00</div>
+                        <div id="timer-status-text" class="text-[10px] font-bold text-white/80 mt-1 uppercase tracking-widest bg-black/20 px-2 py-0.5 rounded-full backdrop-blur">Prêt ?</div>
                     </div>
                     <div id="reps-display-group" class="hidden">
-                        <div id="player-reps" class="text-[5rem] font-black text-white tracking-tighter drop-shadow-xl leading-none">12</div>
-                        <div class="text-sm font-bold text-white/80 uppercase tracking-widest mt-1">Répétitions</div>
-                    </div>
-                    <div id="countdown-display" class="hidden absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50 rounded-[2rem]">
-                        <div id="countdown-val" class="text-[7rem] font-black text-white animate-pulse drop-shadow-2xl">3</div>
+                        <div id="player-reps" class="text-5xl font-black text-white tracking-tighter drop-shadow-xl leading-none">12</div>
+                        <div class="text-xs font-bold text-white/80 uppercase tracking-widest mt-1">Répétitions</div>
                     </div>
                 </div>
-                <div class="absolute bottom-0 left-0 w-full h-2 bg-black/30 backdrop-blur">
-                     <div id="timer-bar" class="h-full bg-gradient-to-r from-white to-blue-200 w-full transition-all duration-1000 ease-linear origin-left box-shadow-[0_0_10px_white]"></div>
+
+                <div class="absolute bottom-0 left-0 w-full h-1.5 bg-black/30 backdrop-blur"><div id="timer-bar" class="h-full bg-white w-full transition-all duration-1000 ease-linear origin-left"></div></div>
+            </div>
+
+            <!-- TOOLBAR: POIDS + BTNS -->
+            <div id="weight-input-container" class="w-full flex items-center justify-between gap-3 mb-4">
+                <div class="glass flex-1 flex p-1 rounded-xl items-center gap-2 h-12 border border-white/10 px-3">
+                    <div class="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center text-blue-400 shrink-0 border border-blue-500/20">
+                        <i data-lucide="scale" class="w-4 h-4"></i>
+                    </div>
+                    <div class="flex flex-col justify-center">
+                        <span class="text-[8px] text-slate-400 font-bold uppercase tracking-wide leading-none">Charge</span>
+                        <input type="number" id="player-weight-input" class="bg-transparent w-full outline-none text-white text-sm font-bold placeholder-slate-600 h-5" placeholder="0 kg">
+                    </div>
                 </div>
             </div>
 
-            <div class="flex items-center gap-3 mb-6">
-                 <div class="glass flex-1 p-1 rounded-xl flex items-center gap-2 h-12 border border-white/10 px-3 relative overflow-hidden">
-                    <div class="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center text-blue-400 shrink-0"><i data-lucide="scale" class="w-4 h-4"></i></div>
-                    <input type="text" id="player-input" class="bg-transparent w-full outline-none text-white text-base font-bold placeholder-slate-600" placeholder="Poids (kg)">
+            <!-- ZONE INSTRUCTIONS (Ou "A Suivre" si repos) -->
+            <div class="w-full flex-1 min-h-0 flex flex-col">
+                <div class="flex items-center gap-2 mb-3 text-slate-400 shrink-0">
+                    <i id="instruction-icon" data-lucide="list-checks" class="w-4 h-4 text-emerald-400"></i>
+                    <span id="instruction-title" class="text-xs font-bold uppercase tracking-widest text-emerald-100">Exécution & Sécurité</span>
                 </div>
-                <button onclick="toggleAutoFlow()" id="autoflow-btn" class="h-12 px-4 rounded-xl border border-white/10 bg-slate-800/50 flex flex-col items-center justify-center gap-0.5 min-w-[70px]">
-                    <i data-lucide="infinity" class="w-4 h-4 text-slate-400"></i>
-                    <span class="text-[8px] font-bold uppercase text-slate-500">Auto</span>
-                </button>
-            </div>
-
-            <div class="glass-card rounded-2xl p-5 border border-white/5 mb-6">
-                <div class="flex items-center gap-2 mb-4 text-slate-400">
-                    <i data-lucide="info" class="w-4 h-4"></i>
-                    <span class="text-xs font-bold uppercase tracking-widest">Conseils</span>
-                </div>
-                <div id="player-steps" class="space-y-3 text-slate-300 text-sm leading-relaxed font-medium"></div>
-                <button onclick="toggleDetails()" class="mt-5 flex items-center gap-2 text-xs font-bold text-blue-400 hover:text-blue-300 transition-colors uppercase tracking-wide group w-full pt-3 border-t border-white/5">
-                    <i data-lucide="chevron-down" id="detail-chevron" class="chevron-rotate w-4 h-4"></i>
-                    Voir les explications détaillées
-                </button>
-                <div id="detailed-content-wrapper" class="details-content">
-                    <div class="pt-4 text-slate-400 text-sm leading-7 space-y-3" id="player-details-text"></div>
+                <div id="player-instructions" class="space-y-2 overflow-y-auto pr-1 pb-4">
+                    <!-- Rempli par JS -->
                 </div>
             </div>
         </div>
 
+        <!-- BOTTOM NAV -->
         <div class="absolute bottom-0 left-0 w-full p-5 bg-gradient-to-t from-[#020617] via-[#020617] to-transparent z-30 flex gap-4 pt-10">
-             <button onclick="prevSlide()" class="w-16 h-16 rounded-2xl bg-slate-800/80 backdrop-blur flex items-center justify-center text-slate-300 border border-white/10 active:scale-95 transition-transform">
-                <i data-lucide="chevron-left" class="w-7 h-7"></i>
-            </button>
-            <button onclick="manualNext()" class="flex-1 bg-white text-slate-950 font-black text-xl italic rounded-2xl flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(255,255,255,0.3)] active:scale-[0.98] transition-transform group overflow-hidden relative">
-                <span class="relative z-10 flex items-center gap-2">SUIVANT <i data-lucide="arrow-right" class="w-6 h-6 stroke-[3px]"></i></span>
-            </button>
-        </div>
-
-        <!-- REST SCREEN -->
-        <div id="rest-overlay" class="absolute inset-0 bg-indigo-950 z-50 flex flex-col items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
-            <div class="absolute inset-0 overflow-hidden"><div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-600/30 blur-[120px] rounded-full animate-pulse"></div></div>
-            <p class="text-indigo-200 text-sm font-bold uppercase tracking-[0.3em] mb-8 relative z-10">Récupération</p>
-            <div class="relative z-10 mb-10">
-                <svg class="w-64 h-64 transform -rotate-90" viewBox="0 0 100 100">
-                    <circle class="text-indigo-900 stroke-current" stroke-width="4" cx="50" cy="50" r="45" fill="transparent"></circle>
-                    <circle id="rest-ring" class="text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.5)] stroke-current" stroke-width="4" stroke-linecap="round" cx="50" cy="50" r="45" fill="transparent" stroke-dasharray="283" stroke-dashoffset="0"></circle>
-                </svg>
-                <div class="absolute inset-0 flex items-center justify-center"><span class="text-8xl font-black text-white tabular-nums tracking-tighter" id="rest-timer">20</span></div>
-            </div>
-            <div class="glass p-6 rounded-2xl w-72 text-center border border-white/10 relative z-10 backdrop-blur-xl">
-                <p class="text-[10px] text-indigo-300 uppercase font-bold mb-2 tracking-wider">Prochain exercice</p>
-                <h3 class="text-2xl font-black text-white leading-tight" id="next-exercise-name">...</h3>
-            </div>
-            <button onclick="endRestEarly()" class="mt-12 px-8 py-4 rounded-full bg-white/10 text-white text-xs font-bold border border-white/20 hover:bg-white/20 transition-all uppercase tracking-widest backdrop-blur relative z-10">Sauter le repos</button>
-        </div>
-    </div>
-
-    <!-- === 4. MODAL DETAIL === -->
-    <div id="detail-modal" class="fixed inset-0 w-full h-full bg-[#020617]/95 backdrop-blur-xl flex flex-col pt-4 z-[150] translate-y-full transition-transform duration-300">
-        <div class="flex justify-between items-center px-5 pb-4 border-b border-white/10 shrink-0">
-            <h3 class="text-lg font-bold text-slate-200">Aperçu</h3>
-            <button onclick="closeModal()" class="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
-        </div>
-        <div class="flex-1 overflow-y-auto px-5 pb-10 pt-6">
-            <div id="modal-visual" class="w-full h-48 rounded-2xl mb-6 flex items-center justify-center relative overflow-hidden shadow-2xl"><i id="modal-big-icon" data-lucide="dumbbell" class="w-20 h-20 text-white/90 relative z-10 drop-shadow-lg"></i></div>
-            <h2 id="modal-title" class="text-3xl font-black text-white mb-3">Titre</h2>
-            <div id="modal-tags-container" class="flex flex-wrap gap-2 mb-8"></div>
-            <h4 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Mouvements</h4>
-            <div id="modal-steps" class="space-y-4"></div>
+             <button onclick="prevStep()" class="w-16 h-16 rounded-2xl bg-slate-800/80 backdrop-blur flex items-center justify-center text-slate-300 border border-white/10 active:scale-95 transition-transform"><i data-lucide="chevron-left" class="w-7 h-7"></i></button>
+            <button onclick="nextStep()" id="next-btn" class="flex-1 bg-white text-slate-950 font-black text-xl italic rounded-2xl flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(255,255,255,0.3)] active:scale-[0.98] transition-transform"><span class="flex items-center gap-2">SUIVANT <i data-lucide="arrow-right" class="w-6 h-6 stroke-[3px]"></i></span></button>
         </div>
     </div>
 
     <!-- NAVBAR -->
     <nav class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-md glass-card rounded-2xl px-2 py-3 flex justify-around items-center z-50 shadow-2xl border border-white/10">
         <button onclick="nav('home')" class="nav-btn active flex flex-col items-center justify-center w-14 h-14 rounded-xl text-slate-400 transition-all duration-300"><i data-lucide="layout-grid" class="w-6 h-6"></i></button>
-        <button onclick="nav('workout')" class="nav-btn flex flex-col items-center justify-center w-14 h-14 rounded-xl text-slate-400 transition-all duration-300 relative">
-             <div class="absolute inset-0 bg-blue-600 rounded-xl opacity-0 scale-50 transition-all duration-300" id="nav-highlight"></div>
-             <i data-lucide="dumbbell" class="w-6 h-6 relative z-10 transition-colors duration-300"></i>
-        </button>
+        <button onclick="nav('workout')" class="nav-btn flex flex-col items-center justify-center w-14 h-14 rounded-xl text-slate-400 transition-all duration-300 relative"><i data-lucide="dumbbell" class="w-6 h-6 relative z-10"></i></button>
         <button onclick="nav('settings')" class="nav-btn flex flex-col items-center justify-center w-14 h-14 rounded-xl text-slate-400 transition-all duration-300"><i data-lucide="sliders-horizontal" class="w-6 h-6"></i></button>
     </nav>
 
-    <!-- === 5. PAGE PARAMÈTRES === -->
+    <!-- === 4. PAGE PARAMÈTRES === -->
     <div id="settings-page" class="page-content h-full overflow-y-auto no-scrollbar px-5 pt-8">
         <h2 class="text-3xl font-black mb-8 text-white">Paramètres</h2>
         
-        <!-- Import Section -->
         <div class="glass-card rounded-2xl p-6 mb-6 border border-blue-500/20">
-            <label class="block text-blue-400 text-xs mb-4 font-bold uppercase tracking-widest flex items-center gap-2">
-                <i data-lucide="download-cloud" class="w-4 h-4"></i> Importer un programme
-            </label>
-            
-            <div class="flex justify-between items-center mb-4">
-                <p class="text-slate-400 text-xs">Collez le code JSON ci-dessous.</p>
-                <button onclick="downloadTemplate()" class="text-[10px] font-bold text-blue-400 border border-blue-400/30 px-3 py-1.5 rounded-lg hover:bg-blue-400/10 transition-colors flex items-center gap-1">
-                    <i data-lucide="file-json" class="w-3 h-3"></i> Modèle
+            <div class="flex items-center justify-between mb-4">
+                <label class="text-blue-400 text-xs font-bold uppercase tracking-widest flex items-center gap-2">
+                    <i data-lucide="download-cloud" class="w-4 h-4"></i> Importer Programme
+                </label>
+                <button onclick="copyTemplate()" class="px-3 py-1.5 rounded-lg bg-blue-500/10 border border-blue-500/30 text-[10px] font-bold text-blue-300 uppercase tracking-wide flex items-center gap-2 active:bg-blue-500/30">
+                    <i data-lucide="copy" class="w-3 h-3"></i> Copier Modèle
                 </button>
             </div>
-
-            <textarea id="import-area" class="w-full bg-black/30 rounded-xl border border-white/10 p-3 text-xs text-slate-300 font-mono focus:outline-none focus:border-blue-500 transition-colors h-32 mb-4 placeholder-slate-600" placeholder='{ "title": "Mon Programme", ... }'></textarea>
-            <button onclick="importWorkout()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl text-sm shadow-lg shadow-blue-900/40 active:scale-[0.98] transition-transform">
-                VALIDER L'IMPORT
-            </button>
+            <p class="text-[10px] text-slate-400 mb-3">Utilisez l'IA pour générer un programme détaillé avec le modèle ci-dessus.</p>
+            <textarea id="import-area" class="w-full bg-black/30 rounded-xl border border-white/10 p-3 text-xs text-slate-300 font-mono h-32 mb-4 placeholder-slate-600 focus:outline-none focus:border-blue-500 transition-colors" placeholder='{ "title": "...", "blocks": [...] }'></textarea>
+            <button onclick="importWorkout()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl text-sm shadow-lg active:scale-95 transition-transform">VALIDER L'IMPORT</button>
         </div>
 
-        <div class="glass-card rounded-2xl p-6 mb-6">
-            <label class="block text-blue-400 text-xs mb-4 font-bold uppercase tracking-widest">Objectif Hebdo</label>
-            <div class="flex items-center justify-between bg-black/20 p-2 rounded-xl border border-white/5">
-                <button onclick="changeGoal(-1)" class="w-12 h-12 rounded-lg bg-slate-800 text-white font-bold hover:bg-slate-700 transition-colors">-</button>
-                <span id="setting-goal-display" class="text-3xl font-black text-white">3</span>
-                <button onclick="changeGoal(1)" class="w-12 h-12 rounded-lg bg-slate-800 text-white font-bold hover:bg-slate-700 transition-colors">+</button>
-            </div>
-        </div>
-        
-        <button onclick="resetData()" class="w-full text-red-400 font-bold py-4 text-sm uppercase tracking-widest opacity-80 hover:opacity-100">Tout Réinitialiser</button>
+        <button onclick="resetData()" class="w-full text-red-400 font-bold py-4 text-sm uppercase tracking-widest opacity-80 hover:opacity-100">Réinitialiser l'application</button>
     </div>
 
     <script>
-        // === PWA LOGIC: GENERATE MANIFEST DYNAMICALLY ===
-        (function setupPWA() {
-            const manifest = {
-                "name": "Fitness Pro",
-                "short_name": "Fitness",
-                "start_url": ".",
-                "display": "standalone",
-                "background_color": "#020617",
-                "theme_color": "#020617",
-                "orientation": "portrait",
-                "icons": [
-                    {
-                        "src": "https://cdn-icons-png.flaticon.com/512/2964/2964514.png", // Icone générique fitness
-                        "sizes": "192x192",
-                        "type": "image/png"
-                    },
-                    {
-                        "src": "https://cdn-icons-png.flaticon.com/512/2964/2964514.png", 
-                        "sizes": "512x512",
-                        "type": "image/png"
-                    }
-                ]
-            };
-            const stringManifest = JSON.stringify(manifest);
-            const blob = new Blob([stringManifest], {type: 'application/json'});
-            const manifestURL = URL.createObjectURL(blob);
-            document.getElementById('my-manifest-placeholder').setAttribute('href', manifestURL);
-        })();
-
-        // === PWA INSTALL PROMPT LOGIC ===
-        let deferredPrompt;
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            document.getElementById('install-prompt').classList.add('visible');
-        });
-
-        async function installPWA() {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                if (outcome === 'accepted') {
-                    console.log('User accepted the PWA prompt');
-                }
-                deferredPrompt = null;
-                document.getElementById('install-prompt').classList.remove('visible');
-            }
-        }
-        function dismissInstall() {
-            document.getElementById('install-prompt').classList.remove('visible');
-        }
-
-        // Detect if installed (standalone mode)
-        if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
-            document.getElementById('pwa-badge').classList.remove('hidden');
-        }
-
-        // --- DONNÉES PAR DÉFAUT ---
-        const DEFAULT_WORKOUT = {
-            id: 'full_body_original',
-            title: 'Full Body',
-            tag: 'Intense',
-            duration: '30 Minutes',
-            exercises: [
-                { id: 'warmup', mode: 'timer', title: 'Échauffement', subtitle: '5 min • Cardio', icon: 'flame', bg: 'from-orange-500 to-red-600', val: 120, rest: 0, 
-                  muscles: ['Cardio', 'Activation'],
-                  steps: ["Trottinez sur place.", "Faites de grands cercles avec les bras.", "Montez les genoux dynamiquement."],
-                  details: "L'échauffement est crucial pour préparer votre cœur et vos articulations à l'effort. <br><br>1. Commencez par marcher sur place, puis accélérez pour trottiner légèrement.<br>2. Tout en bougeant les jambes, effectuez de grands cercles avec vos bras pour déverrouiller les épaules.",
-                  tips: "Augmentez le rythme progressivement." 
-                },
-                { id: 'squat', mode: 'reps', title: 'Squats Explosifs', subtitle: '15 Reps', icon: 'arrow-down-to-line', bg: 'from-blue-600 to-indigo-600', val: 15, rest: 30, 
-                  muscles: ['Quadriceps', 'Fessiers'],
-                  steps: ["Pieds largeur d'épaules.", "Descendez en contrôlant.", "Remontez vite et fort."],
-                  details: "Le squat est l'exercice roi pour le bas du corps.<br><br>1. Placez vos pieds à la largeur de vos épaules.<br>2. Gardez le dos bien droit et la poitrine sortie.<br>3. Descendez jusqu'à la parallèle.",
-                  tips: "Gardez le buste fier et le regard loin." 
-                },
-                { id: 'pushup', mode: 'reps', title: 'Pompes', subtitle: '12 Reps', icon: 'biceps-flexed', bg: 'from-emerald-500 to-teal-600', val: 12, rest: 30, 
-                  muscles: ['Pectoraux', 'Triceps'],
-                  steps: ["Corps bien droit, gainé.", "Poitrine qui frôle le sol.", "Extension complète des bras."],
-                  details: "Les pompes renforcent tout le haut du corps.<br><br>1. Mains au sol plus larges que les épaules.<br>2. Gainez abdos et fessiers.<br>3. Descendez la poitrine au sol.",
-                  tips: "Ne laissez pas le bas du dos se creuser." 
-                },
-                { id: 'plank', mode: 'timer', title: 'Planche', subtitle: '45s', icon: 'shield', bg: 'from-violet-600 to-fuchsia-600', val: 45, rest: 20, 
-                  muscles: ['Abdos', 'Core'],
-                  steps: ["Coudes sous les épaules.", "Contractez tout le corps.", "Respirez calmement."],
-                  details: "Le gainage est essentiel.<br><br>1. Appui sur les avant-bras.<br>2. Contractez fort les abdos.",
-                  tips: "Imaginez que vous repoussez le sol." 
-                },
-                { id: 'lunge', mode: 'reps', title: 'Fentes Alt.', subtitle: '20 Reps', icon: 'move', bg: 'from-rose-500 to-pink-600', val: 20, rest: 30, 
-                  muscles: ['Jambes', 'Équilibre'],
-                  steps: ["Grand pas vers l'arrière.", "Genou arrière vers le sol.", "Alternez gauche et droite."],
-                  details: "Les fentes travaillent l'équilibre.<br><br>1. Grand pas en arrière.<br>2. Genou à 90 degrés.",
-                  tips: "Le genou avant ne dépasse pas la pointe du pied." 
-                },
-                { id: 'cooldown', mode: 'timer', title: 'Retour au calme', subtitle: '3 min', icon: 'wind', bg: 'from-sky-400 to-cyan-500', val: 180, rest: 0, 
-                  muscles: ['Relaxation'],
-                  steps: ["Respirez profondément.", "Étirez doucement les muscles sollicités.", "Relâchez la pression."],
-                  details: "Faites redescendre le rythme cardiaque.<br><br>1. Inspirez profondément.<br>2. Relâchez les tensions.",
-                  tips: "Bravo pour cette session !" 
+        // === TEMPLATE JSON ULTRA-EXIGEANT ===
+        const JSON_TEMPLATE_FOR_AI = {
+            "id": "unique_id_here",
+            "title": "Titre du Programme",
+            "tag": "Objectif (ex: Hypertrophie)",
+            "duration": "Durée (ex: 45 min)",
+            "difficulty": "Intermédiaire",
+            "blocks": [
+                {
+                    "type": "linear | superset | circuit | tabata",
+                    "title": "Nom du Bloc",
+                    "sets": 1,
+                    "rest_between_sets": 60,
+                    "exercises": [
+                        {
+                            "id": "exo_id",
+                            "name_fr": "Nom Français (Officiel)",
+                            "name_en": "English Name (Officiel)",
+                            "mode": "reps | timer",
+                            "val": 12,
+                            "rest_after_exercise": 0,
+                            "icon": "lucide_icon_name",
+                            "color": "from-blue-600 to-indigo-600",
+                            "muscles": ["Muscle A", "Muscle B"],
+                            "instructions": [
+                                "CRITIQUE: Décrire la position de départ (pieds, mains, posture) précisément.",
+                                "CRITIQUE: Décrire le mouvement phase par phase (excentrique/concentrique).",
+                                "CRITIQUE: Indiquer comment respirer (ex: Inspirez en descendant).",
+                                "OBLIGATOIRE: Mentionner une erreur fréquente à éviter."
+                            ],
+                            "tips": "Conseil d'expert court."
+                        }
+                    ]
                 }
             ]
         };
 
-        const STORAGE_KEY = 'fitness_pro_v11';
+        // === DONNÉES PAR DÉFAUT (V17 Content) ===
+        const DEFAULT_WORKOUT_V18 = {
+          "id": "seance_a_v18",
+          "title": "Séance A : Bas du Corps & Poussée",
+          "tag": "Focus Bas du Corps",
+          "duration": "45 Minutes",
+          "difficulty": "Intermédiaire",
+          "blocks": [
+            {
+              "type": "linear",
+              "title": "Échauffement",
+              "sets": 1,
+              "rest_between_sets": 0,
+              "exercises": [
+                {
+                  "id": "warmup_bike",
+                  "name_fr": "Vélo Stationnaire",
+                  "name_en": "Stationary Bike",
+                  "mode": "timer",
+                  "val": 300,
+                  "rest_after_exercise": 60,
+                  "icon": "bike",
+                  "color": "from-orange-500 to-red-600",
+                  "muscles": ["Cardio", "Activation"],
+                  "instructions": [
+                    "Réglez la selle à la hauteur de votre hanche.",
+                    "Commencez à un rythme lent (60 RPM) pendant 2 minutes.",
+                    "Augmentez la résistance progressivement.",
+                    "L'objectif est d'avoir chaud et de transpirer légèrement."
+                  ],
+                  "tips": "Ne crispez pas les épaules."
+                }
+              ]
+            },
+            {
+              "type": "superset",
+              "title": "Bloc 1 : Force Poussée",
+              "sets": 3,
+              "rest_between_sets": 60,
+              "exercises": [
+                {
+                  "id": "goblet_squat",
+                  "name_fr": "Goblet Squat (Haltère)",
+                  "name_en": "Goblet Squat",
+                  "mode": "reps",
+                  "val": 12,
+                  "rest_after_exercise": 0,
+                  "icon": "dumbbell",
+                  "color": "from-blue-600 to-indigo-600",
+                  "muscles": ["Quadriceps", "Fessiers"],
+                  "instructions": [
+                    "Saisissez un haltère verticalement, contre la poitrine.",
+                    "Pieds plus larges que les épaules, orteils ouverts.",
+                    "Inspirez, descendez les fesses vers l'arrière et le bas.",
+                    "Gardez le buste très droit.",
+                    "Poussez fort dans les talons pour remonter."
+                  ],
+                  "tips": "Imaginez vouloir écarter le sol avec vos pieds."
+                },
+                {
+                  "id": "bench_press",
+                  "name_fr": "Développé couché (Haltères)",
+                  "name_en": "Dumbbell Bench Press",
+                  "mode": "reps",
+                  "val": 12,
+                  "rest_after_exercise": 0,
+                  "icon": "arrow-up",
+                  "color": "from-blue-600 to-indigo-600",
+                  "muscles": ["Pectoraux", "Triceps"],
+                  "instructions": [
+                    "Allongez-vous sur le banc, pieds à plat.",
+                    "Démarrez bras tendus au-dessus de la poitrine.",
+                    "Descendez les haltères en contrôle (3 secondes).",
+                    "Les coudes forment un angle de 45° avec le corps.",
+                    "Remontez explosivement en expirant."
+                  ],
+                  "tips": "Gardez les omoplates serrées contre le banc."
+                }
+              ]
+            },
+            {
+              "type": "superset",
+              "title": "Bloc 2 : Unilatéral & Épaules",
+              "sets": 3,
+              "rest_between_sets": 60,
+              "exercises": [
+                {
+                  "id": "lunges",
+                  "name_fr": "Fentes arrière",
+                  "name_en": "Reverse Lunges",
+                  "mode": "reps",
+                  "val": 20,
+                  "rest_after_exercise": 0,
+                  "icon": "move",
+                  "color": "from-indigo-500 to-purple-600",
+                  "muscles": ["Jambes", "Équilibre"],
+                  "instructions": [
+                    "Tenez deux haltères le long du corps.",
+                    "Faites un grand pas vers l'arrière, buste droit.",
+                    "Descendez le genou arrière jusqu'à frôler le sol.",
+                    "Poussez sur la jambe avant pour revenir.",
+                    "Alternez gauche et droite (20 total)."
+                  ],
+                  "tips": "Le poids doit être sur le talon avant."
+                },
+                {
+                  "id": "shoulder_press",
+                  "name_fr": "Développé Épaules",
+                  "name_en": "Seated Shoulder Press",
+                  "mode": "reps",
+                  "val": 12,
+                  "rest_after_exercise": 0,
+                  "icon": "arrow-up-circle",
+                  "color": "from-indigo-500 to-purple-600",
+                  "muscles": ["Épaules", "Triceps"],
+                  "instructions": [
+                    "Assis sur un banc, haltères aux oreilles.",
+                    "Contractez les abdos pour ne pas cambrer.",
+                    "Poussez les haltères vers le plafond.",
+                    "Redescendez lentement jusqu'aux oreilles."
+                  ],
+                  "tips": "Expirez lors de la poussée."
+                }
+              ]
+            },
+            {
+              "type": "tabata",
+              "title": "Finisher : Tabata",
+              "sets": 8,
+              "rest_between_sets": 0,
+              "exercises": [
+                {
+                  "id": "tabata_sprint",
+                  "name_fr": "Sprint Vélo (Tabata)",
+                  "name_en": "Cycling Sprint",
+                  "mode": "timer",
+                  "val": 20,
+                  "rest_after_exercise": 10,
+                  "icon": "zap",
+                  "color": "from-yellow-500 to-orange-600",
+                  "muscles": ["Cardio", "Mental"],
+                  "instructions": [
+                    "EFFORT MAXIMAL (20s) : Pédalez à fond !",
+                    "RÉCUPÉRATION (10s) : Arrêt complet ou pédalage très lent.",
+                    "Le chrono partira tout seul, soyez prêt !",
+                    "Répétez 8 fois sans pause."
+                  ],
+                  "tips": "Tout donner sur les 20 secondes !"
+                }
+              ]
+            },
+            {
+              "type": "linear",
+              "title": "Retour au calme",
+              "sets": 1,
+              "rest_between_sets": 0,
+              "exercises": [
+                {
+                  "id": "stretching",
+                  "name_fr": "Étirements légers",
+                  "name_en": "Light Stretching",
+                  "mode": "timer",
+                  "val": 300,
+                  "rest_after_exercise": 0,
+                  "icon": "wind",
+                  "color": "from-teal-400 to-emerald-500",
+                  "muscles": ["Relaxation"],
+                  "instructions": [
+                    "Respirez profondément.",
+                    "Étirez doucement les quadriceps et les pectoraux.",
+                    "Maintenez chaque étirement 20-30 secondes.",
+                    "Félicitez-vous de votre séance !"
+                  ],
+                  "tips": "Relaxation totale."
+                }
+              ]
+            }
+          ]
+        };
+
+        // --- STATE MANAGEMENT ---
+        const STORAGE_KEY = 'fitness_pro_v18_data';
         let state = { 
             goal: 3, 
             completed: 0, 
             weights: {}, 
-            isAutoFlow: false, 
-            history: [],
-            library: [DEFAULT_WORKOUT], 
+            history: [], 
+            library: [DEFAULT_WORKOUT_V18], 
             activeWorkoutIndex: 0
         };
+
+        let playlist = [], currentStepIndex = 0, timerInterval = null, isRunning = false;
 
         function init() {
             const saved = localStorage.getItem(STORAGE_KEY);
             if(saved) {
-                const parsed = JSON.parse(saved);
-                state = { ...state, ...parsed };
-                if(!state.library || state.library.length === 0) state.library = [DEFAULT_WORKOUT];
+                try {
+                    const parsed = JSON.parse(saved);
+                    if (parsed.library && parsed.library[0] && !parsed.library[0].blocks) {
+                        console.log("Migration requise.");
+                    } else {
+                        state = { ...state, ...parsed };
+                    }
+                } catch(e) { console.error("Load error", e); }
             }
+            if(!state.library || state.library.length === 0) state.library = [DEFAULT_WORKOUT_V18];
             
             renderHome();
-            loadWorkoutToUI(state.activeWorkoutIndex); 
-            updateAutoFlowUI();
+            loadWorkoutToUI(state.activeWorkoutIndex);
             lucide.createIcons();
             nav('home');
         }
 
         function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
 
-        // --- GESTION DES PROGRAMMES ---
-        function setActiveWorkout(index) {
-            state.activeWorkoutIndex = index;
-            save();
-            loadWorkoutToUI(index);
-            nav('workout');
-        }
-
-        function loadWorkoutToUI(index) {
-            const workout = state.library[index] || state.library[0];
-            document.getElementById('workout-page-title').innerText = workout.title;
-            document.getElementById('workout-page-tag').innerText = workout.tag || 'Programme';
-            document.getElementById('workout-page-time').innerText = workout.duration || '';
-            const list = document.getElementById('exercise-list');
-            list.innerHTML = '';
-            
-            workout.exercises.forEach((ex, idx) => {
-                const delayClass = idx < 5 ? `delay-${(idx+1)*100}` : '';
-                const el = document.createElement('div');
-                el.className = `glass-card rounded-2xl p-4 flex items-center gap-4 active:scale-[0.98] transition-all cursor-pointer stagger-item ${delayClass} hover:border-white/20`;
-                el.onclick = () => openModal(idx);
-                
-                el.innerHTML = `
-                    <div class="w-14 h-14 rounded-2xl bg-gradient-to-br ${ex.bg} flex items-center justify-center shadow-lg text-white shrink-0 relative overflow-hidden group">
-                        <div class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
-                        <i data-lucide="${ex.icon}" class="w-6 h-6 relative z-10"></i>
-                    </div>
-                    <div class="overflow-hidden flex-1">
-                        <h4 class="font-bold text-base truncate text-white">${ex.title}</h4>
-                        <p class="text-xs text-slate-400 font-medium">${ex.subtitle}</p>
-                    </div>
-                    <div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-slate-500">
-                        <i data-lucide="chevron-right" class="w-4 h-4"></i>
-                    </div>
-                `;
-                list.appendChild(el);
-            });
-            lucide.createIcons();
-        }
-
-        // --- IMPORT & DOWNLOAD LOGIC ---
-        function downloadTemplate() {
-            const template = {
-                "id": "mon_nouveau_programme",
-                "title": "Nom du Programme",
-                "tag": "Focus (ex: Cardio)",
-                "duration": "30 Minutes",
-                "exercises": [
-                    {
-                        "id": "exercice_1",
-                        "mode": "reps",
-                        "title": "Nom de l'exercice",
-                        "subtitle": "Sous-titre (ex: 12 Reps)",
-                        "icon": "dumbbell",
-                        "bg": "from-blue-600 to-indigo-600",
-                        "val": 12,
-                        "rest": 30,
-                        "muscles": ["Muscle A", "Muscle B"],
-                        "steps": ["Étape 1", "Étape 2"],
-                        "details": "Explication détaillée de l'exercice pour les débutants.",
-                        "tips": "Conseil rapide pour l'exécution."
-                    }
-                ]
-            };
-            
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(template, null, 2));
-            const downloadAnchorNode = document.createElement('a');
-            downloadAnchorNode.setAttribute("href", dataStr);
-            downloadAnchorNode.setAttribute("download", "modele_entrainement.json");
-            document.body.appendChild(downloadAnchorNode);
-            downloadAnchorNode.click();
-            downloadAnchorNode.remove();
-        }
-
-        function importWorkout() {
-            const input = document.getElementById('import-area').value;
-            try {
-                const newWorkout = JSON.parse(input);
-                if(!newWorkout.title || !newWorkout.exercises || !Array.isArray(newWorkout.exercises)) {
-                    throw new Error("Format invalide: Titre ou exercices manquants.");
-                }
-                state.library.push(newWorkout);
-                save();
-                renderHome();
-                document.getElementById('import-area').value = '';
-                alert("Programme importé avec succès !");
-                nav('home');
-            } catch(e) {
-                alert("Erreur d'importation : " + e.message);
-            }
-        }
-
-        // --- RENDER HOME ---
+        // --- HOME & CALENDAR ---
         function renderHome() {
-            animateNumber('completed-count', state.completed);
+            document.getElementById('completed-count').innerText = state.completed;
             document.getElementById('goal-count').innerText = state.goal;
-            document.getElementById('setting-goal-display').innerText = state.goal;
-
             const pct = Math.min((state.completed / state.goal) * 100, 100);
             document.getElementById('linear-progress').style.width = `${pct}%`;
-            
             const ring = document.getElementById('progress-ring');
             const c = 2 * Math.PI * 40;
             ring.style.strokeDasharray = `${c} ${c}`;
             ring.style.strokeDashoffset = c - (pct/100)*c;
-            
-            const progContainer = document.getElementById('programs-list');
-            progContainer.innerHTML = '';
-            
-            state.library.forEach((prog, index) => {
-                const isSelected = index === state.activeWorkoutIndex;
-                const card = document.createElement('div');
-                const borderClass = isSelected ? 'border-blue-500/50 bg-blue-900/10' : 'border-white/5';
-                card.className = `glass program-card rounded-2xl p-4 flex items-center justify-between cursor-pointer ${borderClass}`;
-                card.onclick = () => setActiveWorkout(index);
-                card.innerHTML = `
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-xl bg-slate-800 flex items-center justify-center text-slate-300 font-bold border border-white/10">
-                            ${index + 1}
-                        </div>
-                        <div>
-                            <h4 class="font-bold text-white text-base">${prog.title}</h4>
-                            <p class="text-xs text-slate-400">${prog.exercises.length} Exercices • ${prog.duration || 'Variable'}</p>
-                        </div>
-                    </div>
-                    ${isSelected ? '<div class="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center text-white"><i data-lucide="check" class="w-3 h-3"></i></div>' : '<i data-lucide="chevron-right" class="w-4 h-4 text-slate-600"></i>'}
-                `;
-                progContainer.appendChild(card);
-            });
 
             const grid = document.getElementById('calendar-grid');
             grid.innerHTML = '';
@@ -667,192 +502,294 @@
                 const active = state.history.includes(iso);
                 const day = document.createElement('div');
                 day.className = `calendar-day ${active ? 'active' : ''}`;
-                day.innerHTML = `<span class="text-[0.55rem] uppercase opacity-60 mb-0.5">${['D','L','M','M','J','V','S'][d.getDay()]}</span><span class="text-sm font-bold">${d.getDate()}</span>`;
+                day.innerHTML = `<span class="opacity-60 mb-0.5" style="font-size:0.6rem">${['D','L','M','M','J','V','S'][d.getDay()]}</span><span class="font-bold">${d.getDate()}</span>`;
                 grid.appendChild(day);
             }
+
+            const list = document.getElementById('programs-list');
+            list.innerHTML = '';
+            state.library.forEach((prog, idx) => {
+                const isSelected = idx === state.activeWorkoutIndex;
+                const div = document.createElement('div');
+                div.className = `glass program-card rounded-2xl p-4 flex items-center justify-between cursor-pointer ${isSelected ? 'border-blue-500/50 bg-blue-900/10' : 'border-white/5'}`;
+                div.onclick = () => { state.activeWorkoutIndex = idx; save(); loadWorkoutToUI(idx); nav('workout'); };
+                div.innerHTML = `
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-slate-800 flex items-center justify-center text-slate-300 font-bold border border-white/10 text-lg">${idx + 1}</div>
+                        <div>
+                            <h4 class="font-bold text-white text-base">${prog.title}</h4>
+                            <p class="text-xs text-slate-400">${prog.tag} • ${prog.duration}</p>
+                        </div>
+                    </div>
+                    ${isSelected ? '<i data-lucide="check-circle-2" class="text-blue-500 w-6 h-6"></i>' : '<i data-lucide="chevron-right" class="text-slate-600 w-5 h-5"></i>'}
+                `;
+                list.appendChild(div);
+            });
             lucide.createIcons();
         }
 
-        function animateNumber(id, final) {
-            const el = document.getElementById(id);
-            let start = 0, duration = 1000;
-            const step = ts => {
-                if(!start) start = ts;
-                const p = Math.min((ts - start) / duration, 1);
-                el.innerText = Math.floor(p * final);
-                if(p < 1) requestAnimationFrame(step); else el.innerText = final;
-            };
-            requestAnimationFrame(step);
+        function copyTemplate() {
+            const str = JSON.stringify(JSON_TEMPLATE_FOR_AI, null, 2);
+            const el = document.createElement('textarea');
+            el.value = str; el.setAttribute('readonly', ''); el.style.position = 'absolute'; el.style.left = '-9999px';
+            document.body.appendChild(el); el.select(); document.execCommand('copy'); document.body.removeChild(el);
+            alert("Modèle copié !");
         }
 
-        // --- PLAYER LOGIC ---
-        let pIndex = 0, timerInt = null, timeLeft = 0, isRunning = false, isResting = false, isCountingDown = false;
+        function importWorkout() {
+            try {
+                const val = document.getElementById('import-area').value;
+                const json = JSON.parse(val);
+                if(!json.blocks) throw new Error("Format invalide (manque 'blocks')");
+                state.library.push(json); save(); renderHome();
+                alert("Programme importé !"); document.getElementById('import-area').value = ""; nav('home');
+            } catch(e) { alert("Erreur d'importation : " + e.message); }
+        }
 
-        function getCurrentExercises() { return state.library[state.activeWorkoutIndex].exercises; }
+        // --- WORKOUT LOGIC ---
+        function loadWorkoutToUI(index) {
+            const workout = state.library[index];
+            document.getElementById('workout-page-title').innerText = workout.title;
+            document.getElementById('workout-page-tag').innerText = workout.tag;
+            document.getElementById('workout-page-time').innerText = workout.duration;
 
-        function startPlayer() { pIndex = 0; document.getElementById('player-overlay').classList.add('active'); loadSlide(); }
+            const container = document.getElementById('workout-structure-list');
+            container.innerHTML = '';
+
+            workout.blocks.forEach(block => {
+                let badgeClass = "bg-slate-700 text-slate-300";
+                let badgeText = block.type.toUpperCase();
+                if(block.type === 'superset') { badgeClass = "bg-purple-500/20 text-purple-300 border border-purple-500/20"; badgeText = `SUPERSET (x${block.sets})`; }
+                if(block.type === 'tabata') { badgeClass = "bg-orange-500/20 text-orange-300 border border-orange-500/20"; badgeText = `TABATA (x${block.sets})`; }
+
+                const blockEl = document.createElement('div');
+                blockEl.className = "block-group";
+                blockEl.innerHTML = `
+                    <div class="block-label ${badgeClass}">${badgeText} • ${block.title}</div>
+                    <div class="space-y-3 pl-2">
+                        ${block.exercises.map(ex => `
+                            <div class="glass-card rounded-xl p-3 flex items-center gap-3 border border-white/5">
+                                <div class="w-10 h-10 rounded-lg bg-gradient-to-br ${ex.color || 'from-slate-700 to-slate-600'} flex items-center justify-center text-white shrink-0 shadow-md">
+                                    <i data-lucide="${ex.icon || 'activity'}" class="w-5 h-5"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-sm font-bold text-white leading-tight">${ex.name_fr}</h4>
+                                    <p class="text-[10px] text-slate-400 font-medium mt-0.5">
+                                        ${ex.mode === 'timer' ? ex.val + ' sec' : ex.val + ' reps'} 
+                                        ${block.sets > 1 && ex.rest_after_exercise === 0 ? '• Enchaîner' : ''}
+                                    </p>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                container.appendChild(blockEl);
+            });
+            lucide.createIcons();
+        }
+
+        function generatePlaylist(workout) {
+            let list = [];
+            workout.blocks.forEach(block => {
+                for(let set = 1; set <= block.sets; set++) {
+                    block.exercises.forEach((ex, exIdx) => {
+                        list.push({ type: 'work', data: ex, blockTitle: block.title, setInfo: block.sets > 1 ? `Série ${set}/${block.sets}` : '', blockType: block.type });
+                        if(ex.rest_after_exercise > 0) {
+                             list.push({ type: 'rest', duration: ex.rest_after_exercise });
+                        } else if (exIdx === block.exercises.length - 1 && set < block.sets && block.rest_between_sets > 0) {
+                             list.push({ type: 'rest', duration: block.rest_between_sets });
+                        }
+                    });
+                }
+            });
+            return list;
+        }
+
+        function startPlayer() {
+            const workout = state.library[state.activeWorkoutIndex];
+            playlist = generatePlaylist(workout);
+            currentStepIndex = 0;
+            document.getElementById('player-overlay').style.transform = "translateY(0)";
+            loadStep();
+        }
 
         function closePlayer() {
-            clearInterval(timerInt); isRunning = false; isResting = false; isCountingDown = false;
-            document.getElementById('player-overlay').classList.remove('active');
-            document.getElementById('rest-overlay').style.opacity = '0';
-            document.getElementById('rest-overlay').style.pointerEvents = 'none';
+            stopTimer();
+            document.getElementById('player-overlay').style.transform = "translateY(100%)";
         }
 
-        function loadSlide() {
-            clearInterval(timerInt); isRunning = false; isCountingDown = false;
-            const exercises = getCurrentExercises();
-            const ex = exercises[pIndex];
-            
-            document.getElementById('detailed-content-wrapper').classList.remove('open');
-            document.getElementById('detail-chevron').classList.remove('rotate');
+        function loadStep() {
+            stopTimer();
+            if(currentStepIndex >= playlist.length) { finishWorkout(); return; }
 
-            document.getElementById('player-title').innerText = ex.title;
-            document.getElementById('player-progress-text').innerText = `${pIndex+1}/${exercises.length}`;
-            document.getElementById('player-mode-badge').innerText = ex.mode === 'timer' ? 'TEMPS' : 'REPS';
+            const step = playlist[currentStepIndex];
+
+            // SI C'EST DU REPOS
+            if(step.type === 'rest') {
+                renderRestStep(step.duration);
+                return;
+            }
+
+            // SI C'EST DU TRAVAIL
+            const ex = step.data;
+            document.getElementById('player-title').innerText = ex.name_fr;
+            document.getElementById('player-subtitle').innerText = ex.name_en || '';
+            document.getElementById('player-subtitle').classList.remove('hidden');
+            document.getElementById('weight-input-container').classList.remove('hidden');
+
+            document.getElementById('instruction-title').innerText = "Exécution & Sécurité";
+            document.getElementById('instruction-icon').setAttribute('data-lucide', 'list-checks');
+
+            document.getElementById('player-progress-text').innerText = `${currentStepIndex + 1} / ${playlist.length}`;
+            document.getElementById('player-set-badge').innerText = step.setInfo || 'SÉRIE';
             
             const visual = document.getElementById('visual-container');
-            visual.className = `w-full h-[220px] shrink-0 rounded-[2rem] mb-6 bg-gradient-to-br ${ex.bg} shadow-2xl relative overflow-hidden mx-auto flex flex-col items-center justify-center cursor-pointer ring-1 ring-white/20 group transition-all duration-500`;
+            visual.className = `w-full h-40 shrink-0 rounded-[2rem] mb-4 shadow-2xl relative overflow-hidden flex flex-row items-center justify-between px-8 cursor-pointer ring-1 ring-white/20 group transition-all bg-gradient-to-br ${ex.color || 'from-slate-700 to-slate-800'}`;
+            document.getElementById('player-bg-icon').setAttribute('data-lucide', ex.icon || 'activity');
             
-            document.getElementById('player-bg-icon').setAttribute('data-lucide', ex.icon);
-            document.getElementById('player-input').value = state.weights[ex.id] || '';
-            document.getElementById('player-input').oninput = (e) => { state.weights[ex.id] = e.target.value; save(); };
-            
-            const stepsHtml = ex.steps.map((s,i) => `<div class="flex gap-3 items-start"><span class="w-5 h-5 rounded-full bg-white/10 text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5 border border-white/10">${i+1}</span><span class="text-slate-300 leading-tight">${s}</span></div>`).join('');
-            document.getElementById('player-steps').innerHTML = stepsHtml;
-            document.getElementById('player-details-text').innerHTML = ex.details || "Pas de détails supplémentaires.";
-
             document.getElementById('timer-bar').style.width = '100%';
-            document.getElementById('timer-display-group').classList.remove('hidden');
-            document.getElementById('reps-display-group').classList.add('hidden');
-            document.getElementById('countdown-display').classList.add('hidden');
-
-            if(ex.mode === 'reps' && !state.isAutoFlow) {
+            if(ex.mode === 'reps') {
                 document.getElementById('timer-display-group').classList.add('hidden');
                 document.getElementById('reps-display-group').classList.remove('hidden');
                 document.getElementById('player-reps').innerText = ex.val;
             } else {
-                let t = ex.mode === 'reps' && state.isAutoFlow ? Math.max(30, ex.val*3) : ex.val;
-                setupTimer(t, false);
+                document.getElementById('timer-display-group').classList.remove('hidden');
+                document.getElementById('reps-display-group').classList.add('hidden');
+                document.getElementById('player-timer').innerText = formatTime(ex.val);
+                document.getElementById('timer-status-text').innerText = "Prêt ?";
+                
+                // --- AUTO START LOGIC ---
+                // Démarrage auto après 1.5s pour laisser le temps de voir l'écran
+                setTimeout(() => {
+                    // Vérifier qu'on est toujours sur le même step et que ça n'a pas déjà démarré
+                    if(currentStepIndex === playlist.indexOf(step) && !isRunning) {
+                        startWorkTimer(ex);
+                    }
+                }, 1200);
             }
+
+            // INSTRUCTIONS
+            const instrContainer = document.getElementById('player-instructions');
+            instrContainer.innerHTML = '';
+            if(ex.instructions && ex.instructions.length > 0) {
+                ex.instructions.forEach((ins, idx) => {
+                    const div = document.createElement('div');
+                    div.className = "p-3 bg-white/5 rounded-lg border border-white/5 mb-2 flex gap-3";
+                    div.innerHTML = `
+                        <span class="w-5 h-5 rounded-full bg-blue-500/20 text-blue-300 text-[10px] font-bold flex items-center justify-center shrink-0 border border-blue-500/20 mt-0.5">${idx+1}</span>
+                        <p class="text-xs text-slate-300 leading-relaxed font-medium">${ins}</p>
+                    `;
+                    instrContainer.appendChild(div);
+                });
+            } else {
+                instrContainer.innerHTML = '<p class="text-slate-500 italic text-xs">Pas d\'instructions détaillées.</p>';
+            }
+
+            document.getElementById('player-weight-input').value = state.weights[ex.id] || '';
+            document.getElementById('player-weight-input').oninput = (e) => { state.weights[ex.id] = e.target.value; save(); };
             lucide.createIcons();
+        }
 
-            if ((ex.mode === 'timer' || state.isAutoFlow) && document.getElementById('player-overlay').classList.contains('active')) {
-                setTimeout(() => { if(!isRunning && !isCountingDown) runCountdown(); }, 600);
+        // --- NOUVELLE FONCTION: RENDU INTÉGRÉ DU REPOS ---
+        function renderRestStep(duration) {
+            // Identifier le prochain exercice
+            let nextName = "Terminé !";
+            for(let i=currentStepIndex+1; i<playlist.length; i++) {
+                if(playlist[i].type === 'work') { nextName = playlist[i].data.name_fr; break; }
             }
+
+            // UI Updates pour mode "Repos"
+            document.getElementById('player-title').innerText = "Récupération";
+            document.getElementById('player-subtitle').classList.add('hidden');
+            document.getElementById('weight-input-container').classList.add('hidden');
+            
+            document.getElementById('instruction-title').innerText = "À Suivre";
+            document.getElementById('instruction-icon').setAttribute('data-lucide', 'arrow-right-circle');
+
+            const visual = document.getElementById('visual-container');
+            // Fond bleu nuit apaisant pour le repos
+            visual.className = `w-full h-40 shrink-0 rounded-[2rem] mb-4 shadow-2xl relative overflow-hidden flex flex-row items-center justify-between px-8 ring-1 ring-white/20 bg-gradient-to-br from-indigo-900 to-slate-900`;
+            document.getElementById('player-bg-icon').setAttribute('data-lucide', 'coffee');
+            
+            document.getElementById('timer-display-group').classList.remove('hidden');
+            document.getElementById('reps-display-group').classList.add('hidden');
+            
+            // Affichage "Prochain Exercice" dans la zone d'instructions
+            const instrContainer = document.getElementById('player-instructions');
+            instrContainer.innerHTML = `
+                <div class="p-4 bg-indigo-500/10 rounded-xl border border-indigo-500/30 flex items-center gap-4">
+                    <div class="flex-1">
+                        <p class="text-[10px] text-indigo-300 uppercase font-bold tracking-widest mb-1">Préparez-vous pour</p>
+                        <h3 class="text-lg font-black text-white leading-none">${nextName}</h3>
+                    </div>
+                    <button onclick="endRest()" class="px-4 py-2 bg-indigo-600 rounded-lg text-xs font-bold text-white shadow-lg active:scale-95 transition-transform">GO !</button>
+                </div>
+            `;
+            
+            // Lancer le timer de repos
+            startRestTimerIntegrated(duration);
+            lucide.createIcons();
         }
 
-        function toggleDetails() {
-            const content = document.getElementById('detailed-content-wrapper');
-            const chevron = document.getElementById('detail-chevron');
-            content.classList.toggle('open');
-            chevron.classList.toggle('rotate');
-        }
+        function startRestTimerIntegrated(duration) {
+            let r = duration;
+            const timerDisplay = document.getElementById('player-timer');
+            const statusText = document.getElementById('timer-status-text');
+            const bar = document.getElementById('timer-bar');
+            
+            timerDisplay.innerText = formatTime(r);
+            statusText.innerText = "Respirez...";
+            bar.style.width = '100%';
 
-        function setupTimer(sec) {
-            timeLeft = sec;
-            document.getElementById('player-timer').innerText = formatTime(timeLeft);
-            document.getElementById('timer-status-text').innerText = "Prêt ?";
+            timerInterval = setInterval(() => {
+                r--;
+                timerDisplay.innerText = formatTime(r);
+                bar.style.width = `${(r/duration)*100}%`;
+                if(r <= 0) {
+                    endRest();
+                }
+            }, 1000);
         }
 
         function handleVisualClick() {
-            const ex = getCurrentExercises()[pIndex];
-            if(ex.mode === 'reps' && !state.isAutoFlow) return;
-            if (isCountingDown) return;
+            const step = playlist[currentStepIndex];
+            if(step.type === 'rest') return; // Click during rest does nothing (use button below)
             
             if(isRunning) {
-                clearInterval(timerInt); isRunning = false;
+                stopTimer();
                 document.getElementById('timer-status-text').innerText = "Pause";
                 document.getElementById('visual-container').classList.remove('pulse-heart');
             } else {
-                runTimer();
+                startWorkTimer(step.data);
             }
         }
 
-        function runCountdown() {
-            if(isCountingDown) return;
-            isCountingDown = true;
-            document.getElementById('timer-display-group').classList.add('hidden');
-            document.getElementById('reps-display-group').classList.add('hidden');
-            document.getElementById('countdown-display').classList.remove('hidden');
-            let c = 3;
-            document.getElementById('countdown-val').innerText = c;
-            
-            let i = setInterval(() => {
-                c--;
-                if(c > 0) document.getElementById('countdown-val').innerText = c;
-                else {
-                    clearInterval(i);
-                    document.getElementById('countdown-display').classList.add('hidden');
-                    document.getElementById('timer-display-group').classList.remove('hidden');
-                    isCountingDown = false;
-                    runTimer();
-                }
-            }, 1000);
-        }
-
-        function runTimer() {
+        function startWorkTimer(ex) {
+            if(isRunning) return; // Prevent double start
             isRunning = true;
-            document.getElementById('timer-status-text').innerText = "Go !";
             document.getElementById('visual-container').classList.add('pulse-heart');
+            if(ex.mode === 'reps') return;
             
-            const exercises = getCurrentExercises();
-            const ex = exercises[pIndex];
-            const initialVal = (ex.mode === 'reps' && state.isAutoFlow) ? Math.max(30, ex.val*3) : ex.val;
-
-            timerInt = setInterval(() => {
+            document.getElementById('timer-status-text').innerText = "Go !";
+            let timeLeft = ex.val;
+            const total = ex.val;
+            
+            timerInterval = setInterval(() => {
                 timeLeft--;
                 document.getElementById('player-timer').innerText = formatTime(timeLeft);
-                const pct = (timeLeft / initialVal) * 100;
-                document.getElementById('timer-bar').style.width = `${pct}%`;
-
-                if(timeLeft <= 0) {
-                    clearInterval(timerInt); isRunning = false;
-                    document.getElementById('visual-container').classList.remove('pulse-heart');
-                    confetti({ particleCount: 50, spread: 60, origin: { y: 0.5 } });
-                    
-                    if(pIndex < exercises.length - 1) {
-                        if((ex.mode === 'timer' || state.isAutoFlow) && ex.rest > 0) startRest(ex.rest);
-                        else if (state.isAutoFlow) { pIndex++; loadSlide(); } 
-                        else document.getElementById('timer-status-text').innerText = "Terminé";
-                    } else finishWorkout();
-                }
+                document.getElementById('timer-bar').style.width = `${(timeLeft/total)*100}%`;
+                if(timeLeft <= 0) { stopTimer(); confetti({ particleCount: 50, spread: 60, origin: { y: 0.5 } }); nextStep(); }
             }, 1000);
         }
 
-        function startRest(sec) {
-            isResting = true;
-            const overlay = document.getElementById('rest-overlay');
-            overlay.style.opacity = '1'; overlay.style.pointerEvents = 'all';
-            document.getElementById('next-exercise-name').innerText = getCurrentExercises()[pIndex+1].title;
-            let r = sec;
-            const ring = document.getElementById('rest-ring');
-            const circumference = 2 * Math.PI * 45;
-            document.getElementById('rest-timer').innerText = r;
-            
-            timerInt = setInterval(() => {
-                r--;
-                document.getElementById('rest-timer').innerText = r;
-                const offset = circumference - ((r / sec) * circumference);
-                ring.style.strokeDashoffset = -offset;
-                if(r <= 0) endRestEarly();
-            }, 1000);
+        function endRest() {
+            stopTimer();
+            nextStep();
         }
 
-        function endRestEarly() {
-            clearInterval(timerInt); isResting = false;
-            const overlay = document.getElementById('rest-overlay');
-            overlay.style.opacity = '0'; overlay.style.pointerEvents = 'none';
-            pIndex++; loadSlide();
-        }
-
-        function manualNext() {
-            const exercises = getCurrentExercises();
-            if(isResting) endRestEarly();
-            else if(pIndex < exercises.length - 1) { pIndex++; loadSlide(); }
-            else finishWorkout();
-        }
-        function prevSlide() { if(pIndex > 0) { pIndex--; loadSlide(); } }
+        function nextStep() { currentStepIndex++; loadStep(); }
+        function prevStep() { if(currentStepIndex > 0) { currentStepIndex--; loadStep(); } }
+        function stopTimer() { clearInterval(timerInterval); isRunning = false; document.getElementById('visual-container')?.classList.remove('pulse-heart'); }
 
         function finishWorkout() {
             closePlayer();
@@ -860,52 +797,19 @@
             const today = new Date().toISOString().split('T')[0];
             if(!state.history.includes(today)) state.history.push(today);
             save(); renderHome();
-            confetti({ particleCount: 200, spread: 100, origin: { y: 0.6 } });
+            confetti({ particleCount: 150, spread: 100, origin: { y: 0.6 } });
             nav('home');
         }
 
-        // --- UTILS ---
-        function openModal(index) {
-            const ex = getCurrentExercises()[index];
-            document.getElementById('modal-title').innerText = ex.title;
-            document.getElementById('modal-big-icon').setAttribute('data-lucide', ex.icon);
-            document.getElementById('modal-visual').className = `w-full h-48 rounded-2xl mb-6 flex items-center justify-center relative overflow-hidden shadow-2xl bg-gradient-to-br ${ex.bg}`;
-            document.getElementById('modal-tags-container').innerHTML = ex.muscles.map(m=>`<span class="px-3 py-1 bg-white/10 rounded-full text-xs font-bold text-white border border-white/10">${m}</span>`).join('');
-            document.getElementById('modal-steps').innerHTML = ex.steps.map((s,i)=>`<div class="flex gap-3"><span class="w-6 h-6 rounded-full bg-blue-500 text-white text-xs flex items-center justify-center font-bold shrink-0">${i+1}</span><p class="text-slate-300 text-sm leading-relaxed">${s}</p></div>`).join('');
-            lucide.createIcons();
-            document.getElementById('detail-modal').style.transform = "translateY(0)";
-        }
-        function closeModal() { document.getElementById('detail-modal').style.transform = "translateY(100%)"; }
-
-        function toggleAutoFlow() { state.isAutoFlow = !state.isAutoFlow; updateAutoFlowUI(); loadSlide(); }
-        function updateAutoFlowUI() {
-            const btn = document.getElementById('autoflow-btn');
-            if(state.isAutoFlow) {
-                btn.className = "h-12 px-4 rounded-xl border border-blue-400 bg-blue-600/20 text-blue-400 flex flex-col items-center justify-center gap-0.5 min-w-[70px] shadow-[0_0_15px_rgba(59,130,246,0.3)]";
-                btn.innerHTML = `<i data-lucide="infinity" class="w-4 h-4"></i><span class="text-[8px] font-bold uppercase">ON</span>`;
-            } else {
-                btn.className = "h-12 px-4 rounded-xl border border-white/10 bg-slate-800/50 text-slate-500 flex flex-col items-center justify-center gap-0.5 min-w-[70px]";
-                btn.innerHTML = `<i data-lucide="infinity" class="w-4 h-4"></i><span class="text-[8px] font-bold uppercase">OFF</span>`;
-            }
-            lucide.createIcons();
-        }
-
+        function formatTime(s) { const m = Math.floor(s/60); const sec = s%60; return `${m}:${sec<10?'0'+sec:sec}`; }
+        function resetData() { if(confirm("Effacer toutes les données ?")) { localStorage.removeItem(STORAGE_KEY); location.reload(); } }
         function nav(id) {
             document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
             document.getElementById(id + '-page').classList.add('active');
             const btns = document.querySelectorAll('.nav-btn');
-            btns.forEach(b => {
-                b.classList.remove('text-white'); b.classList.add('text-slate-400');
-                if(b.querySelector('#nav-highlight')) b.querySelector('#nav-highlight').classList.remove('opacity-100', 'scale-100');
-            });
-            const activeBtn = btns[{'home':0, 'workout':1, 'settings':2}[id]];
-            activeBtn.classList.replace('text-slate-400', 'text-white');
-            if(id === 'workout') activeBtn.querySelector('#nav-highlight').classList.add('opacity-100', 'scale-100');
+            btns.forEach(b => { b.classList.remove('text-white'); b.classList.add('text-slate-400'); });
+            btns[{'home':0, 'workout':1, 'settings':2}[id]].classList.replace('text-slate-400', 'text-white');
         }
-
-        function formatTime(s) { const m = Math.floor(s/60); const sec = s%60; return `${m}:${sec<10?'0'+sec:sec}`; }
-        function changeGoal(d) { state.goal = Math.max(1, Math.min(7, state.goal + d)); save(); renderHome(); }
-        function resetData() { if(confirm("Réinitialiser ?")) { localStorage.removeItem(STORAGE_KEY); location.reload(); } }
 
         init();
     </script>
