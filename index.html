@@ -1373,13 +1373,22 @@
 
         // --- NOUVELLE FONCTION: RENDU INTÉGRÉ DU REPOS ---
         function renderRestStep(duration) {
-            // Hide local progress during rest to avoid confusion
-            document.getElementById('local-progress-container').classList.add('hidden');
+            // 1. Keep local progress VISIBLE (Superset status)
+            document.getElementById('local-progress-container').classList.remove('hidden');
 
-            let nextName = "Terminé !";
+            // 2. Find Next Work Step Data
+            let nextStep = null;
             for (let i = currentStepIndex + 1; i < playlist.length; i++) {
-                if (playlist[i].type === 'work') { nextName = playlist[i].data.name_fr; break; }
+                if (playlist[i].type === 'work') {
+                    nextStep = playlist[i];
+                    break;
+                }
             }
+
+            const nextName = nextStep ? nextStep.data.name_fr : "Terminé !";
+            const nextIcon = nextStep && nextStep.data.icon ? nextStep.data.icon : "check-circle";
+            // Clean tips if needed, though they usually are plain text
+            const nextTips = nextStep && nextStep.data.tips ? nextStep.data.tips : null;
 
             document.getElementById('player-title').innerText = "Récupération";
             document.getElementById('player-subtitle').classList.add('hidden');
@@ -1396,15 +1405,59 @@
             document.getElementById('reps-display-group').classList.add('hidden');
 
             const instrContainer = document.getElementById('player-instructions');
-            instrContainer.innerHTML = `
-                <div class="p-4 bg-indigo-500/10 rounded-xl border border-indigo-500/30 flex items-center gap-4">
-                    <div class="flex-1">
-                        <p class="text-[10px] text-indigo-300 uppercase font-bold tracking-widest mb-1">Préparez-vous pour</p>
-                        <h3 class="text-lg font-black text-white leading-none">${nextName}</h3>
-                    </div>
-                    <button onclick="endRest()" class="px-4 py-2 bg-indigo-600 rounded-lg text-xs font-bold text-white shadow-lg active:scale-95 transition-transform">GO !</button>
+            // Build Rich Preview with FULL IMAGE
+            let htmlContent = `<div class="flex flex-col gap-3 animate-in fade-in slide-in-from-bottom-4 duration-500">`;
+
+            // 1. NEXT EXERCISE HEADER + BUTTON
+            htmlContent += `
+        <div class="flex items-center justify-between mb-2">
+            <div>
+                <p class="text-[10px] text-indigo-300 uppercase font-bold tracking-widest">À Suivre</p>
+                <h3 class="text-xl font-black text-white leading-tight">${nextName}</h3>
+            </div>
+            <button onclick="endRest()" class="px-4 py-2 bg-indigo-600 rounded-lg text-xs font-bold text-white shadow-lg active:scale-95 transition-transform whitespace-nowrap">GO !</button>
+        </div>
+    `;
+
+            // 2. TIPS (First Priority as requested)
+            if (nextTips) {
+                htmlContent += `
+            <div class="p-4 bg-emerald-500/10 rounded-xl border border-emerald-500/30 mb-2">
+                <div class="flex items-center gap-2 mb-2">
+                    <i data-lucide="lightbulb" class="w-4 h-4 text-emerald-400"></i>
+                    <p class="text-xs font-bold text-emerald-400 uppercase tracking-widest">Conseil Pro</p>
+                </div>
+                <p class="text-sm text-slate-300 leading-relaxed font-medium">"${nextTips}"</p>
+            </div>
+        `;
+            }
+
+            // 3. INSTRUCTIONS (Second Priority)
+            if (nextStep && nextStep.data.instructions && nextStep.data.instructions.length > 0) {
+                htmlContent += `<div class="flex flex-col gap-2 mb-2">`;
+                nextStep.data.instructions.forEach((ins, idx) => {
+                    const cleanIns = ins.replace(/^((CRITIQUE|OBLIGATOIRE):|\d+[.)]|-|•)\s*/i, "");
+                    htmlContent += `
+                <div class="p-3 bg-white/5 rounded-lg border border-white/5 flex gap-3">
+                    <span class="w-5 h-5 rounded-full bg-indigo-500/20 text-indigo-300 text-[10px] font-bold flex items-center justify-center shrink-0 border border-indigo-500/20 mt-0.5">${idx + 1}</span>
+                    <p class="text-xs text-slate-300 leading-relaxed font-medium">${cleanIns}</p>
                 </div>
             `;
+                });
+                htmlContent += `</div>`;
+            }
+
+            // 4. IMAGE PREVIEW (Last Priority)
+            if (nextStep && nextStep.data.gifUrl) {
+                htmlContent += `
+            <div class="rounded-xl overflow-hidden border border-white/10 bg-black/50 shadow-lg relative aspect-square flex items-center justify-center group mb-2">
+                 <img src="${nextStep.data.gifUrl}" class="w-full h-full object-cover opacity-100" alt="${nextName}">
+            </div>
+        `;
+            }
+
+            htmlContent += `</div>`; // Close flex col
+            instrContainer.innerHTML = htmlContent;
 
 
             startRestTimerIntegrated(duration);
@@ -1436,6 +1489,10 @@
                     endRest();
                     return;
                 }
+
+
+
+
 
                 timerDisplay.innerText = formatTime(remaining);
                 const progress = (remaining / duration) * 100;
@@ -1626,13 +1683,16 @@
                 const detailsDiv = document.createElement('div');
                 detailsDiv.className = "mt-4 p-4 bg-white/5 rounded-2xl animate-in fade-in slide-in-from-top-4 duration-300";
 
-                const niceDate = new Date(selectedCalendarDate).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+                // FIX: Parse YYYY-MM-DD manually to create LOCAL date, avoiding UTC shift
+                const [y, m, d] = selectedCalendarDate.split('-').map(Number);
+                const niceDateObject = new Date(y, m - 1, d);
+                const niceDate = niceDateObject.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
 
-                const workouts = state.history.filter(h => h.date === selectedCalendarDate);
+                const historyForDay = state.history.filter(h => h.date === selectedCalendarDate);
 
                 let contentHtml = `<h4 class="text-blue-300 font-bold capitalize mb-2 text-sm">${niceDate}</h4>`;
 
-                if (workouts.length === 0) {
+                if (historyForDay.length === 0) {
                     contentHtml += `<p class="text-slate-500 text-xs italic">Aucun entraînement enregistré.</p>`;
                 } else {
                     workouts.forEach(w => {
